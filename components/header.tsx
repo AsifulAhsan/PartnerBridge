@@ -20,7 +20,7 @@ export function Header({ title, subtitle, actions, onMenuToggle }: HeaderProps) 
         <div className="flex items-center justify-between gap-4">
 
           <div className="flex items-center gap-3 md:gap-6">
-            <button 
+            <button
               onClick={onMenuToggle}
               className="md:hidden p-1 -ml-1 text-blue-200 hover:text-white hover:bg-white/10 rounded transition-all cursor-pointer"
               aria-label="Open navigation menu"
@@ -33,7 +33,11 @@ export function Header({ title, subtitle, actions, onMenuToggle }: HeaderProps) 
                 PartnerBridge
               </span>
             </div>
-
+            <div className="flex flex-col">
+              <h1 className="block lg:hidden text-sm font-bold tracking-tight line-clamp-1">
+                PartnerBridge
+              </h1>
+            </div>
           </div>
 
           {actions && <div className="hidden lg:flex items-center gap-2">{actions}</div>}
