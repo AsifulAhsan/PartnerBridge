@@ -29,7 +29,6 @@ import {
   Cell,
 } from 'recharts'
 
-// Data Streams retained from previous ecosystem mapping
 const weeklyLogisticsData = [
   { name: 'Saturday', dispatches: 12, value: 240000 },
   { name: 'Sunday', dispatches: 19, value: 380000 },
@@ -155,7 +154,6 @@ export default function Dashboard() {
       <Sidebar />
 
       <main className="flex-1 overflow-auto md:ml-0">
-        {/* Salesense Theme Header Overlay */}
         <div className="bg-[#1F3A60] text-white">
           <Header
             title="Business Analytics Console"
@@ -163,20 +161,18 @@ export default function Dashboard() {
           />
         </div>
 
-        {/* Salesense Structural Breadcrumb Ribbon */}
-        <div className="bg-white border-b border-slate-200 px-6 py-2.5 flex items-center gap-2 text-xs text-slate-500 font-medium">
-          <Home className="w-3.5 h-3.5 text-blue-800" />
+        <div className="bg-white border-b border-slate-200 px-4 sm:px-6 py-2.5 flex items-center gap-2 text-xs text-slate-500 font-medium overflow-x-auto whitespace-nowrap">
+          <Home className="w-3.5 h-3.5 text-blue-800 shrink-0" />
           <span className="text-blue-800 font-semibold hover:underline cursor-pointer">Home</span>
-          <ChevronRight className="w-3 h-3 text-slate-400" />
+          <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
           <span className="text-blue-800 font-semibold hover:underline cursor-pointer">Reports</span>
-          <ChevronRight className="w-3 h-3 text-slate-400" />
+          <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
           <span className="text-slate-600">Sales Dashboard</span>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="p-4 sm:p-6 space-y-6">
 
           {/* SALESENSE CLEAN MULTI-CARD GRID MATRIX */}
-          {/* UPDATE YOUR METRIC CARDS ROW WITH THIS FIX */}
           <Row gutter={[12, 12]}>
             <Col xs={24} sm={12} lg={6}>
               <Card
@@ -189,7 +185,6 @@ export default function Dashboard() {
                   <p className="text-xs font-semibold text-slate-600 mb-1">Primary Ordered</p>
                   <Statistic
                     value={156}
-                    // 👇 FIXED: Changed from valueStyle to styles.content
                     styles={{ content: { fontSize: '22px', fontWeight: 800, color: '#1F3A60' } }}
                   />
                   <p className="text-[10px] text-slate-400 mt-1 font-medium">This Month Trailing</p>
@@ -209,7 +204,6 @@ export default function Dashboard() {
                   <Statistic
                     value={2845000}
                     prefix="৳ "
-                    // 👇 FIXED: Changed from valueStyle to styles.content
                     styles={{ content: { fontSize: '22px', fontWeight: 800, color: '#1F3A60' } }}
                   />
                   <p className="text-[10px] text-slate-400 mt-1 font-medium">Net Realized Collection</p>
@@ -229,7 +223,6 @@ export default function Dashboard() {
                   <Statistic
                     value={6500000}
                     prefix="৳ "
-                    // 👇 FIXED: Changed from valueStyle to styles.content
                     styles={{ content: { fontSize: '22px', fontWeight: 800, color: '#1F3A60' } }}
                   />
                   <p className="text-[10px] text-slate-400 mt-1 font-medium">Cap Limit: ৳ 10M</p>
@@ -249,7 +242,6 @@ export default function Dashboard() {
                   <Statistic
                     value={12}
                     suffix=" Units"
-                    // 👇 FIXED: Changed from valueStyle to styles.content
                     styles={{ content: { fontSize: '22px', fontWeight: 800, color: '#1F3A60' } }}
                   />
                   <p className="text-[10px] text-slate-400 mt-1 font-medium">Active Transit Cargo</p>
@@ -261,39 +253,43 @@ export default function Dashboard() {
           {/* SYSTEM TREND PLOTS CONTAINER */}
           <Row gutter={[16, 16]}>
             <Col xs={24} lg={16}>
-              <div className="bg-white rounded-md border border-slate-200 p-5 shadow-sm h-full">
+              <div className="bg-white rounded-md border border-slate-200 p-4 sm:p-5 shadow-sm h-full">
                 <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-3">
                   <div>
                     <h2 className="text-sm font-bold text-[#1F3A60]">Overall Sales Flow Trends</h2>
                     <p className="text-[11px] text-slate-400">Weekly breakdown of distributor logistics velocity</p>
                   </div>
                   <AntTooltip title="Data aggregates ex-mill transaction volumes.">
-                    <Info className="w-4 h-4 text-slate-400 cursor-help" />
+                    <Info className="w-4 h-4 text-slate-400 cursor-help shrink-0" />
                   </AntTooltip>
                 </div>
 
-                <ResponsiveContainer width="100%" height={280}>
-                  <BarChart data={weeklyLogisticsData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="0" stroke="#F1F5F9" vertical={false} />
-                    <XAxis dataKey="name" stroke="#94A3B8" fontSize={10} tickLine={false} />
-                    <YAxis stroke="#94A3B8" fontSize={10} tickLine={false} axisLine={false} />
-                    <RechartsTooltip
-                      contentStyle={{
-                        backgroundColor: '#FFF',
-                        border: '1px solid #CBD5E1',
-                        borderRadius: '4px',
-                      }}
-                    />
-                    <Legend verticalAlign="top" height={32} iconType="square" iconSize={10} wrapperStyle={{ fontSize: '11px' }} />
-                    <Bar name="Dispatched Cargo Units" dataKey="dispatches" fill="#1F3A60" radius={[2, 2, 0, 0]} barSize={20} />
-                    <Bar name="Value Stream (BDT)" dataKey="value" fill="#64748B" radius={[2, 2, 0, 0]} barSize={20} />
-                  </BarChart>
-                </ResponsiveContainer>
+                <div className="w-full overflow-x-auto overflow-y-hidden">
+                  <div className="min-w-125 w-full">
+                    <ResponsiveContainer width="100%" height={280}>
+                      <BarChart data={weeklyLogisticsData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="0" stroke="#F1F5F9" vertical={false} />
+                        <XAxis dataKey="name" stroke="#94A3B8" fontSize={10} tickLine={false} />
+                        <YAxis stroke="#94A3B8" fontSize={10} tickLine={false} axisLine={false} />
+                        <RechartsTooltip
+                          contentStyle={{
+                            backgroundColor: '#FFF',
+                            border: '1px solid #CBD5E1',
+                            borderRadius: '4px',
+                          }}
+                        />
+                        <Legend verticalAlign="top" height={32} iconType="square" iconSize={10} wrapperStyle={{ fontSize: '11px' }} />
+                        <Bar name="Dispatched Cargo Units" dataKey="dispatches" fill="#1F3A60" radius={[2, 2, 0, 0]} barSize={20} />
+                        <Bar name="Value Stream (BDT)" dataKey="value" fill="#64748B" radius={[2, 2, 0, 0]} barSize={20} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
               </div>
             </Col>
 
             <Col xs={24} lg={8}>
-              <div className="bg-white rounded-md border border-slate-200 p-5 shadow-sm h-full flex flex-col justify-between">
+              <div className="bg-white rounded-md border border-slate-200 p-4 sm:p-5 shadow-sm h-full flex flex-col justify-between">
                 <div className="border-b border-slate-100 pb-3">
                   <h2 className="text-sm font-bold text-[#1F3A60]">Dealer Credit Position</h2>
                   <p className="text-[11px] text-slate-400">Asset distribution of limits</p>
@@ -329,9 +325,9 @@ export default function Dashboard() {
                     <div key={item.name} className="flex items-center justify-between text-[11px]">
                       <div className="flex items-center gap-1.5">
                         <div className="w-2 h-2 rounded-sm" style={{ backgroundColor: item.fill }} />
-                        <span className="text-slate-600">{item.name}</span>
+                        <span className="text-slate-600 truncate max-w-45">{item.name}</span>
                       </div>
-                      <span className="font-bold text-slate-800">{item.value}%</span>
+                      <span className="font-bold text-slate-800 shrink-0">{item.value}%</span>
                     </div>
                   ))}
                 </div>
@@ -340,15 +336,15 @@ export default function Dashboard() {
           </Row>
 
           {/* DATA LEDGER TABLE CARD */}
-          <div className="bg-white rounded-md border border-slate-200 p-5 shadow-sm">
-            <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+          <div className="bg-white rounded-md border border-slate-200 p-4 sm:p-5 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 border-b border-slate-100 pb-3">
               <div>
                 <h2 className="text-sm font-bold text-[#1F3A60]">All Dispatches Ledger</h2>
                 <p className="text-[11px] text-slate-400">Real-time tracked distribution orders routed across dealer lines</p>
               </div>
               <button
                 onClick={() => window.location.href = '/orders'}
-                className="bg-[#1F3A60] hover:bg-[#152842] text-white text-xs font-semibold px-3 py-1.5 rounded-sm transition-colors shadow-xs"
+                className="bg-[#1F3A60] hover:bg-[#152842] text-white text-xs font-semibold px-3 py-1.5 rounded-sm transition-colors shadow-xs self-start sm:self-auto"
               >
                 Load Data
               </button>
@@ -361,6 +357,7 @@ export default function Dashboard() {
               size="small"
               className="border border-slate-100 rounded-sm"
               rowClassName="hover:bg-slate-50/80"
+              scroll={{ x: 'max-content' }}
             />
           </div>
 
