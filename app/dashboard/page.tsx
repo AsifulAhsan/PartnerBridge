@@ -1,0 +1,371 @@
+'use client'
+
+import { Sidebar } from '@/components/sidebar'
+import { Header } from '@/components/header'
+import { useState } from 'react'
+import { Card, Row, Col, Statistic, Table, Tag, Tooltip as AntTooltip } from 'antd'
+import {
+  Package,
+  Truck,
+  DollarSign,
+  AlertCircle,
+  Clock,
+  TrendingUp,
+  Info,
+  ChevronRight,
+  Home
+} from 'lucide-react'
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from 'recharts'
+
+// Data Streams retained from previous ecosystem mapping
+const weeklyLogisticsData = [
+  { name: 'Saturday', dispatches: 12, value: 240000 },
+  { name: 'Sunday', dispatches: 19, value: 380000 },
+  { name: 'Monday', dispatches: 14, value: 290000 },
+  { name: 'Tuesday', dispatches: 22, value: 450000 },
+  { name: 'Wednesday', dispatches: 28, value: 580000 },
+  { name: 'Thursday', dispatches: 16, value: 320000 },
+  { name: 'Friday', dispatches: 9, value: 180000 },
+]
+
+const creditDistribution = [
+  { name: 'Available Credit Line', value: 65, fill: '#1F3A60' },
+  { name: 'Utilized Credit', value: 25, fill: '#4B5563' },
+  { name: 'Escrowed/Reserved Pool', value: 10, fill: '#9CA3AF' },
+]
+
+const recentOrders = [
+  {
+    key: '1',
+    id: 'ORD-2026-08101',
+    customer: 'Natore Poultry & Hatchery Complex',
+    product: 'Premium Broiler Feed Starter (40 Bags)',
+    quantity: 40,
+    status: 'delivered',
+    date: '2026-06-06',
+    total: 92400,
+  },
+  {
+    key: '2',
+    id: 'ORD-2026-08102',
+    customer: 'Mymensingh Aqua Culture Project',
+    product: 'High-Protein Floating Tilapia Grower (25 Bags)',
+    quantity: 25,
+    status: 'in-transit',
+    date: '2026-06-05',
+    total: 58750,
+  },
+  {
+    key: '3',
+    id: 'ORD-2026-08103',
+    customer: 'Shahjadpur Milk Cooperative Hub',
+    product: 'Milking Dairy Feed Premium (15 Bags)',
+    quantity: 15,
+    status: 'processing',
+    date: '2026-06-05',
+    total: 31500,
+  },
+  {
+    key: '4',
+    id: 'ORD-2026-08104',
+    customer: 'Rahman Agro & Livestock Farm',
+    product: 'Bull Fattening Feed Mash (50 Bags)',
+    quantity: 50,
+    status: 'pending',
+    date: '2026-06-04',
+    total: 97500,
+  },
+]
+
+export default function Dashboard() {
+  const [activeKpi, setActiveKpi] = useState<string | null>(null)
+
+  const columns = [
+    {
+      title: 'Order ID',
+      dataIndex: 'id',
+      key: 'id',
+      render: (text: string) => <span className="font-bold text-slate-700">{text}</span>,
+    },
+    {
+      title: 'Dealer Node / Client',
+      dataIndex: 'customer',
+      key: 'customer',
+      render: (text: string) => <div className="font-semibold text-slate-800">{text}</div>,
+    },
+    {
+      title: 'Product Allocation Line',
+      dataIndex: 'product',
+      key: 'product',
+      ellipsis: true,
+    },
+    {
+      title: 'Volume (Bags)',
+      dataIndex: 'quantity',
+      key: 'quantity',
+      align: 'center' as const,
+      render: (qty: number) => <span className="font-bold">{qty}</span>
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      align: 'center' as const,
+      render: (status: string) => {
+        let tagColor = 'default';
+        if (status === 'delivered') tagColor = 'blue';
+        if (status === 'in-transit') tagColor = 'cyan';
+        if (status === 'processing') tagColor = 'warning';
+        return (
+          <Tag color={tagColor} className="rounded-sm font-bold uppercase text-[10px] px-2 py-0.5">
+            {status.replace('-', ' ')}
+          </Tag>
+        )
+      },
+    },
+    {
+      title: 'Date',
+      dataIndex: 'date',
+      key: 'date',
+      render: (date: string) => <span className="text-slate-500 text-xs">{date}</span>
+    },
+    {
+      title: 'Total Amount',
+      dataIndex: 'total',
+      key: 'total',
+      align: 'right' as const,
+      render: (val: number) => <span className="font-bold text-slate-900">৳ {val.toLocaleString('en-IN')}</span>,
+    },
+  ]
+
+  return (
+    <div className="flex h-screen bg-[#EAEFF4]">
+      <Sidebar />
+
+      <main className="flex-1 overflow-auto md:ml-0">
+        {/* Salesense Theme Header Overlay */}
+        <div className="bg-[#1F3A60] text-white">
+          <Header
+            title="Business Analytics Console"
+            subtitle="Regional distribution node operations and liquidity tracking metrics"
+          />
+        </div>
+
+        {/* Salesense Structural Breadcrumb Ribbon */}
+        <div className="bg-white border-b border-slate-200 px-6 py-2.5 flex items-center gap-2 text-xs text-slate-500 font-medium">
+          <Home className="w-3.5 h-3.5 text-blue-800" />
+          <span className="text-blue-800 font-semibold hover:underline cursor-pointer">Home</span>
+          <ChevronRight className="w-3 h-3 text-slate-400" />
+          <span className="text-blue-800 font-semibold hover:underline cursor-pointer">Reports</span>
+          <ChevronRight className="w-3 h-3 text-slate-400" />
+          <span className="text-slate-600">Sales Dashboard</span>
+        </div>
+
+        <div className="p-6 space-y-6">
+
+          {/* SALESENSE CLEAN MULTI-CARD GRID MATRIX */}
+          {/* UPDATE YOUR METRIC CARDS ROW WITH THIS FIX */}
+          <Row gutter={[12, 12]}>
+            <Col xs={24} sm={12} lg={6}>
+              <Card
+                variant='borderless'
+                onClick={() => setActiveKpi('orders')}
+                styles={{ body: { padding: '16px' } }}
+                className={`rounded-md transition-all shadow-sm border-slate-200 ${activeKpi === 'orders' ? 'border-blue-800 ring-1 ring-blue-800/20' : ''}`}
+              >
+                <div className="text-center">
+                  <p className="text-xs font-semibold text-slate-600 mb-1">Primary Ordered</p>
+                  <Statistic
+                    value={156}
+                    // 👇 FIXED: Changed from valueStyle to styles.content
+                    styles={{ content: { fontSize: '22px', fontWeight: 800, color: '#1F3A60' } }}
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1 font-medium">This Month Trailing</p>
+                </div>
+              </Card>
+            </Col>
+
+            <Col xs={24} sm={12} lg={6}>
+              <Card
+                variant='borderless'
+                onClick={() => setActiveKpi('revenue')}
+                styles={{ body: { padding: '16px' } }}
+                className={`rounded-md transition-all shadow-sm border-slate-200 ${activeKpi === 'revenue' ? 'border-blue-800 ring-1 ring-blue-800/20' : ''}`}
+              >
+                <div className="text-center">
+                  <p className="text-xs font-semibold text-slate-600 mb-1">Gross Invoiced Value</p>
+                  <Statistic
+                    value={2845000}
+                    prefix="৳ "
+                    // 👇 FIXED: Changed from valueStyle to styles.content
+                    styles={{ content: { fontSize: '22px', fontWeight: 800, color: '#1F3A60' } }}
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1 font-medium">Net Realized Collection</p>
+                </div>
+              </Card>
+            </Col>
+
+            <Col xs={24} sm={12} lg={6}>
+              <Card
+                variant='borderless'
+                onClick={() => setActiveKpi('credit')}
+                styles={{ body: { padding: '16px' } }}
+                className={`rounded-md transition-all shadow-sm border-slate-200 ${activeKpi === 'credit' ? 'border-blue-800 ring-1 ring-blue-800/20' : ''}`}
+              >
+                <div className="text-center">
+                  <p className="text-xs font-semibold text-slate-600 mb-1">Available Credit Line</p>
+                  <Statistic
+                    value={6500000}
+                    prefix="৳ "
+                    // 👇 FIXED: Changed from valueStyle to styles.content
+                    styles={{ content: { fontSize: '22px', fontWeight: 800, color: '#1F3A60' } }}
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1 font-medium">Cap Limit: ৳ 10M</p>
+                </div>
+              </Card>
+            </Col>
+
+            <Col xs={24} sm={12} lg={6}>
+              <Card
+                variant='borderless'
+                onClick={() => setActiveKpi('transit')}
+                styles={{ body: { padding: '16px' } }}
+                className={`rounded-md transition-all shadow-sm border-slate-200 ${activeKpi === 'transit' ? 'border-blue-800 ring-1 ring-blue-800/20' : ''}`}
+              >
+                <div className="text-center">
+                  <p className="text-xs font-semibold text-slate-600 mb-1">Primary Delivered</p>
+                  <Statistic
+                    value={12}
+                    suffix=" Units"
+                    // 👇 FIXED: Changed from valueStyle to styles.content
+                    styles={{ content: { fontSize: '22px', fontWeight: 800, color: '#1F3A60' } }}
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1 font-medium">Active Transit Cargo</p>
+                </div>
+              </Card>
+            </Col>
+          </Row>
+
+          {/* SYSTEM TREND PLOTS CONTAINER */}
+          <Row gutter={[16, 16]}>
+            <Col xs={24} lg={16}>
+              <div className="bg-white rounded-md border border-slate-200 p-5 shadow-sm h-full">
+                <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-3">
+                  <div>
+                    <h2 className="text-sm font-bold text-[#1F3A60]">Overall Sales Flow Trends</h2>
+                    <p className="text-[11px] text-slate-400">Weekly breakdown of distributor logistics velocity</p>
+                  </div>
+                  <AntTooltip title="Data aggregates ex-mill transaction volumes.">
+                    <Info className="w-4 h-4 text-slate-400 cursor-help" />
+                  </AntTooltip>
+                </div>
+
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={weeklyLogisticsData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="0" stroke="#F1F5F9" vertical={false} />
+                    <XAxis dataKey="name" stroke="#94A3B8" fontSize={10} tickLine={false} />
+                    <YAxis stroke="#94A3B8" fontSize={10} tickLine={false} axisLine={false} />
+                    <RechartsTooltip
+                      contentStyle={{
+                        backgroundColor: '#FFF',
+                        border: '1px solid #CBD5E1',
+                        borderRadius: '4px',
+                      }}
+                    />
+                    <Legend verticalAlign="top" height={32} iconType="square" iconSize={10} wrapperStyle={{ fontSize: '11px' }} />
+                    <Bar name="Dispatched Cargo Units" dataKey="dispatches" fill="#1F3A60" radius={[2, 2, 0, 0]} barSize={20} />
+                    <Bar name="Value Stream (BDT)" dataKey="value" fill="#64748B" radius={[2, 2, 0, 0]} barSize={20} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </Col>
+
+            <Col xs={24} lg={8}>
+              <div className="bg-white rounded-md border border-slate-200 p-5 shadow-sm h-full flex flex-col justify-between">
+                <div className="border-b border-slate-100 pb-3">
+                  <h2 className="text-sm font-bold text-[#1F3A60]">Dealer Credit Position</h2>
+                  <p className="text-[11px] text-slate-400">Asset distribution of limits</p>
+                </div>
+
+                <div className="relative flex justify-center items-center my-3">
+                  <ResponsiveContainer width="100%" height={170}>
+                    <PieChart>
+                      <Pie
+                        data={creditDistribution}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={50}
+                        outerRadius={68}
+                        paddingAngle={2}
+                        dataKey="value"
+                      >
+                        {creditDistribution.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.fill} className="outline-none" />
+                        ))}
+                      </Pie>
+                      <RechartsTooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="absolute text-center pointer-events-none">
+                    <span className="text-xl font-bold text-[#1F3A60]">65%</span>
+                    <p className="text-[9px] uppercase font-bold text-slate-400">Available</p>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 text-xs pt-2">
+                  {creditDistribution.map((item) => (
+                    <div key={item.name} className="flex items-center justify-between text-[11px]">
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-2 h-2 rounded-sm" style={{ backgroundColor: item.fill }} />
+                        <span className="text-slate-600">{item.name}</span>
+                      </div>
+                      <span className="font-bold text-slate-800">{item.value}%</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Col>
+          </Row>
+
+          {/* DATA LEDGER TABLE CARD */}
+          <div className="bg-white rounded-md border border-slate-200 p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+              <div>
+                <h2 className="text-sm font-bold text-[#1F3A60]">All Dispatches Ledger</h2>
+                <p className="text-[11px] text-slate-400">Real-time tracked distribution orders routed across dealer lines</p>
+              </div>
+              <button
+                onClick={() => window.location.href = '/orders'}
+                className="bg-[#1F3A60] hover:bg-[#152842] text-white text-xs font-semibold px-3 py-1.5 rounded-sm transition-colors shadow-xs"
+              >
+                Load Data
+              </button>
+            </div>
+
+            <Table
+              columns={columns}
+              dataSource={recentOrders}
+              pagination={false}
+              size="small"
+              className="border border-slate-100 rounded-sm"
+              rowClassName="hover:bg-slate-50/80"
+            />
+          </div>
+
+        </div>
+      </main>
+    </div>
+  )
+}
