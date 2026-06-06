@@ -125,6 +125,8 @@ export default function QuickOrderPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -206,31 +208,31 @@ export default function QuickOrderPage() {
 
   return (
     <div className="flex h-screen bg-[#EAEFF4]">
-      <Sidebar />
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <main className="flex-1 overflow-auto md:ml-0 flex flex-col">
-        {/* Navy Header Shell Block */}
         <div className="bg-[#23496b] text-white">
-          <Header title="Quick Order Entry" subtitle="Search and directly stage catalog products into line distribution sheets" />
+          <Header 
+            title="Quick Order Entry" 
+            subtitle="Search and directly stage catalog products into line distribution sheets" 
+            onMenuToggle={() => setSidebarOpen(true)}
+          />
         </div>
 
-        {/* Corporate Consistent Navigation Breadcrumb Bar */}
-        <div className="bg-white border-b border-slate-200 px-6 py-2.5 flex items-center gap-2 text-xs text-slate-500 font-medium shrink-0">
-          <Home className="w-3.5 h-3.5 text-blue-800" />
+        <div className="bg-white border-b border-slate-200 px-4 sm:px-6 py-2.5 flex items-center gap-2 text-xs text-slate-500 font-medium shrink-0 overflow-x-auto whitespace-nowrap">
+          <Home className="w-3.5 h-3.5 text-blue-800 shrink-0" />
           <span className="text-blue-800 font-semibold hover:underline cursor-pointer">Home</span>
-          <ChevronRight className="w-3 h-3 text-slate-400" />
+          <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
           <span className="text-blue-800 font-semibold hover:underline cursor-pointer">Sales</span>
-          <ChevronRight className="w-3 h-3 text-slate-400" />
+          <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
           <span className="text-slate-600">Quick Order</span>
         </div>
 
-        <div className="flex-1 p-6 grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
-          {/* Products Content Pane */}
-          <div className="lg:col-span-2 space-y-4">
+        <div className="flex-1 p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
+          <div className="lg:col-span-2 space-y-4 w-full">
 
-            {/* Filter and Search Action Box */}
             <div className="bg-white rounded-md border border-slate-200 p-4 space-y-3.5 shadow-xs">
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <div className="flex-1">
                   <Input
                     size="middle"
@@ -239,12 +241,11 @@ export default function QuickOrderPage() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     allowClear
-                    className="rounded-sm"
+                    className="rounded-sm w-full"
                   />
                 </div>
                 
-                {/* Segmented View Mode Toggle Controls */}
-                <div className="flex p-0.5 bg-slate-100 border border-slate-200/80 rounded-sm shrink-0">
+                <div className="flex p-0.5 bg-slate-100 border border-slate-200/80 rounded-sm shrink-0 self-end sm:self-auto">
                   <button
                     onClick={() => setViewMode('grid')}
                     className={`p-1.5 rounded-xs transition-colors ${viewMode === 'grid' 
@@ -266,12 +267,11 @@ export default function QuickOrderPage() {
                 </div>
               </div>
 
-              {/* High-density Categorization Buttons */}
-              <div className="flex items-center gap-2 overflow-x-auto pb-0.5">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">Nodes:</span>
+              <div className="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-thin">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1 shrink-0">Nodes:</span>
                 <button
                   onClick={() => setSelectedCategory(null)}
-                  className={`px-3 py-1 rounded-sm text-xs font-bold transition-all ${!selectedCategory
+                  className={`px-3 py-1 rounded-sm text-xs font-bold transition-all shrink-0 ${!selectedCategory
                     ? 'bg-[#23496b] text-white border border-[#23496b]'
                     : 'bg-slate-100 text-slate-600 border border-slate-200/60 hover:bg-slate-200'
                     }`}
@@ -282,7 +282,7 @@ export default function QuickOrderPage() {
                   <button
                     key={category}
                     onClick={() => setSelectedCategory(category)}
-                    className={`px-3 py-1 rounded-sm text-xs font-bold transition-all ${selectedCategory === category
+                    className={`px-3 py-1 rounded-sm text-xs font-bold transition-all shrink-0 ${selectedCategory === category
                       ? 'bg-[#23496b] text-white border border-[#23496b]'
                       : 'bg-slate-100 text-slate-600 border border-slate-200/60 hover:bg-slate-200'
                       }`}
@@ -293,9 +293,8 @@ export default function QuickOrderPage() {
               </div>
             </div>
 
-            {/* Product Layout Presentation Layer */}
             {viewMode === 'grid' ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {filteredProducts.map((product) => (
                   <div
                     key={product.id}
@@ -303,20 +302,18 @@ export default function QuickOrderPage() {
                   >
                     <div>
                       <div className="flex gap-3 items-start">
-                        {/* Bounded Square Image Container */}
-                        <div className="relative w-24 h-24 bg-slate-50 rounded-sm overflow-hidden border border-slate-200 shrink-0">
+                        <div className="relative w-20 h-20 sm:w-24 sm:h-24 bg-slate-50 rounded-sm overflow-hidden border border-slate-200 shrink-0">
                           <Image
                             src={product.image}
                             alt={product.name}
                             fill
-                            sizes="96px"
+                            sizes="(max-width: 640px) 80px, 96px"
                             className="object-cover"
                             priority={false}
                           />
                         </div>
 
-                        {/* Detail Column text specs */}
-                        <div className="flex-1 min-w-0 h-24 flex flex-col justify-between py-0.5">
+                        <div className="flex-1 min-w-0 h-20 sm:h-24 flex flex-col justify-between py-0.5">
                           <div>
                             <div className="flex items-start justify-between gap-1">
                               <h3 className="font-bold text-slate-800 text-xs leading-tight line-clamp-2">{product.name}</h3>
@@ -332,10 +329,9 @@ export default function QuickOrderPage() {
                         </div>
                       </div>
 
-                      {/* Highly Structured High-Density Pricing Data Box */}
                       <div className="flex items-center justify-between my-3 bg-slate-50 p-2.5 rounded-sm border border-slate-100">
                         <div>
-                          <p className="text-base font-black text-[#23496b]">৳ {product.price.toLocaleString('en-IN')}</p>
+                          <p className="text-sm sm:text-base font-black text-[#23496b]">‎৳ {product.price.toLocaleString('en-IN')}</p>
                           <p className="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Per {product.unit}</p>
                         </div>
                         <div className="text-right">
@@ -359,58 +355,58 @@ export default function QuickOrderPage() {
                 ))}
               </div>
             ) : (
-              /* Highly Structured High-Density List View Layout */
               <div className="bg-white rounded-md border border-slate-200 divide-y divide-slate-100 shadow-xs overflow-hidden">
                 {filteredProducts.map((product) => (
                   <div
                     key={product.id}
-                    className="p-3.5 flex items-center gap-4 hover:bg-slate-50/60 transition-colors"
+                    className="p-3.5 flex flex-col sm:flex-row sm:items-center gap-4 hover:bg-slate-50/60 transition-colors"
                   >
-                    {/* Micro Thumbnail */}
-                    <div className="relative w-14 h-14 bg-slate-50 rounded-sm overflow-hidden border border-slate-200/80 shrink-0">
-                      <Image
-                        src={product.image}
-                        alt={product.name}
-                        fill
-                        sizes="56px"
-                        className="object-cover"
-                        priority={false}
-                      />
-                    </div>
+                    <div className="flex items-center gap-3.5 flex-1 min-w-0">
+                      <div className="relative w-14 h-14 bg-slate-50 rounded-sm overflow-hidden border border-slate-200/80 shrink-0">
+                        <Image
+                          src={product.image}
+                          alt={product.name}
+                          fill
+                          sizes="56px"
+                          className="object-cover"
+                          priority={false}
+                        />
+                      </div>
 
-                    {/* Meta Specifications */}
-                    <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
-                      <div className="min-w-0">
-                        <h3 className="font-bold text-slate-800 text-xs truncate m-0">{product.name}</h3>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-[10px] font-mono text-slate-400 font-bold">SKU: {product.id}</span>
-                          <span className="w-1 h-1 rounded-full bg-slate-300" />
-                          <span className="text-[10px] text-slate-500 font-medium">Packing: {product.size}</span>
+                      <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-3 items-center">
+                        <div className="min-w-0">
+                          <h3 className="font-bold text-slate-800 text-xs truncate m-0">{product.name}</h3>
+                          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1">
+                            <span className="text-[10px] font-mono text-slate-400 font-bold">SKU: {product.id}</span>
+                            <span className="w-1 h-1 rounded-full bg-slate-300 hidden sm:inline-block" />
+                            <span className="text-[10px] text-slate-500 font-medium">Packing: {product.size}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 md:justify-center">
+                          <Tag color="blue" className="m-0 text-[9px] uppercase font-bold rounded-sm border-none bg-slate-100 text-slate-700">
+                            {product.category}
+                          </Tag>
+                          <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium font-mono">({product.inStock} Staged)</span>
+                        </div>
+
+                        <div className="text-left md:text-right">
+                          <span className="text-[9px] text-slate-400 uppercase font-black tracking-wider block leading-none mb-0.5">Wholesale Price</span>
+                          <p className="text-xs sm:text-sm font-black text-[#23496b] m-0">‎৳ {product.price.toLocaleString('en-IN')} <span className="text-[10px] font-bold text-slate-400 font-normal normal-case">/{product.unit}</span></p>
                         </div>
                       </div>
-
-                      <div className="flex items-center gap-2 md:justify-center">
-                        <Tag color="blue" className="m-0 text-[9px] uppercase font-bold rounded-sm border-none bg-slate-100 text-slate-700">
-                          {product.category}
-                        </Tag>
-                        <span className="text-[11px] text-slate-400 font-medium font-mono">({product.inStock} Staged)</span>
-                      </div>
-
-                      <div className="text-left md:text-right">
-                        <span className="text-[9px] text-slate-400 uppercase font-black tracking-wider block leading-none mb-0.5">Wholesale Price</span>
-                        <p className="text-sm font-black text-[#23496b] m-0">৳ {product.price.toLocaleString('en-IN')} <span className="text-[10px] font-bold text-slate-400 normal-case">/{product.unit}</span></p>
-                      </div>
                     </div>
 
-                    {/* Fast Action Row Insertion */}
-                    <div className="shrink-0 pl-2">
+                    <div className="shrink-0 pl-0 sm:pl-2 flex justify-end">
                       <Button
                         type="default"
                         icon={<PlusOutlined />}
                         onClick={() => addToCart(product)}
-                        className="bg-slate-50 hover:bg-[#23496b]! border border-slate-200 text-slate-700 hover:text-white! w-8 h-8 rounded-sm p-0 flex items-center justify-center transition-all shadow-2xs"
+                        className="bg-slate-50 hover:bg-[#23496b]! border border-slate-200 text-slate-700 hover:text-white! w-full sm:w-8 h-8 rounded-sm p-0 flex items-center justify-center transition-all shadow-2xs text-xs sm:text-sm px-4 sm:px-0"
                         title="Add to sheet"
-                      />
+                      >
+                        <span className="inline-block sm:hidden ml-2">Add Item</span>
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -423,8 +419,7 @@ export default function QuickOrderPage() {
             )}
           </div>
 
-          {/* Right Summary Document Module Container */}
-          <div className="bg-white rounded-md border border-slate-200 p-5 space-y-4 shadow-xs">
+          <div className="bg-white rounded-md border border-slate-200 p-4 sm:p-5 space-y-4 shadow-xs w-full">
             <div className="flex justify-between items-center pb-2.5 border-b border-slate-100">
               <h2 className="text-sm font-bold text-[#23496b]">All Invoices / Draft</h2>
               <Tag color="blue" className="font-bold m-0 rounded-sm border-none text-[10px] uppercase">Active Order</Tag>
@@ -455,7 +450,7 @@ export default function QuickOrderPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-bold text-slate-800 truncate">{item.name}</p>
-                          <p className="text-[11px] text-slate-400 font-medium">৳ {item.price.toLocaleString('en-IN')} each</p>
+                          <p className="text-[11px] text-slate-400 font-medium">‎৳ {item.price.toLocaleString('en-IN')} each</p>
                         </div>
                         <Button
                           type="text"
@@ -480,18 +475,17 @@ export default function QuickOrderPage() {
                           />
                         </Space.Compact>
                         <p className="font-bold text-slate-800 text-xs">
-                          ৳ {(item.price * item.quantity).toLocaleString('en-IN')}
+                          ‎৳ {(item.price * item.quantity).toLocaleString('en-IN')}
                         </p>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                {/* Pricing totals blocks stacked explicitly */}
                 <div className="border-t border-slate-200 pt-3.5 space-y-2 text-xs">
                   <div className="flex justify-between text-slate-500 font-medium">
                     <span>Base Wholesale Subtotal:</span>
-                    <span className="text-slate-800 font-bold">৳ {cartTotal.toLocaleString('en-IN')}</span>
+                    <span className="text-slate-800 font-bold">‎৳ {cartTotal.toLocaleString('en-IN')}</span>
                   </div>
                   <div className="flex justify-between text-slate-500 font-medium">
                     <span>Freight/Shipping Routing:</span>
@@ -499,11 +493,10 @@ export default function QuickOrderPage() {
                   </div>
                   <div className="flex justify-between text-sm font-bold text-[#23496b] pt-2.5 border-t border-dashed border-slate-200">
                     <span>Total Aggregate Value:</span>
-                    <span className="text-base font-black">৳ {cartTotal.toLocaleString('en-IN')}</span>
+                    <span className="text-base font-black">‎৳ {cartTotal.toLocaleString('en-IN')}</span>
                   </div>
                 </div>
 
-                {/* System Control Sheet Action Operations Grid */}
                 <div className="space-y-2 pt-1.5">
                   <Button
                     type="primary"
@@ -538,7 +531,6 @@ export default function QuickOrderPage() {
         </div>
       </main>
 
-      {/* Verification Checkout Modal matching configuration rules */}
       <Modal
         title={
           <span className="text-sm font-bold text-slate-900 flex items-center gap-2">
@@ -550,8 +542,8 @@ export default function QuickOrderPage() {
         onOk={handleFinalOrderSubmit}
         onCancel={() => setIsModalOpen(false)}
         confirmLoading={isSubmitting}
-        okText="Confirm & Dispatch Line"
-        cancelText="Cancel Verification"
+        okText="Confirm Order"
+        cancelText="Cancel"
         okButtonProps={{
           style: { backgroundColor: '#23496b', borderRadius: '2px', border: 'none' },
           className: "text-xs font-bold"
@@ -561,16 +553,17 @@ export default function QuickOrderPage() {
         }}
         width={500}
         styles={{ body: { paddingTop: '12px' } }}
+        className="max-w-[calc(100vw-32px)]"
       >
         <div className="space-y-3.5">
           <p className="text-xs text-slate-600">
             Please verify your item before proceeding with this order.
           </p>
 
-          <Descriptions bordered layout="vertical" size="small" className="text-xs">
+          <Descriptions bordered layout="vertical" size="small" className="text-xs" column={{ xs: 1, sm: 3 }}>
             <Descriptions.Item label="Staged Line Items">{cart.length}</Descriptions.Item>
             <Descriptions.Item label="Gross Cargo Bags">{totalItemsCount}</Descriptions.Item>
-            <Descriptions.Item label="Valuation Aggregate">৳ {cartTotal.toLocaleString('en-IN')}</Descriptions.Item>
+            <Descriptions.Item label="Valuation Aggregate">‎৳ {cartTotal.toLocaleString('en-IN')}</Descriptions.Item>
           </Descriptions>
 
           <div className="bg-slate-50 border border-slate-200 rounded-sm p-3 mt-4 text-[11px] font-medium text-slate-500">
