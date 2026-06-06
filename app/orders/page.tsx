@@ -7,7 +7,6 @@ import { useState } from 'react'
 import { Table, Input, Select, Button, Drawer, Space, Statistic, Divider } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 
-// 🇧🇩 Bangladeshi Agro-Logistics localized mock dataset
 const allOrders = [
   {
     id: 'ORD-2026-08101',
@@ -115,6 +114,8 @@ export default function OrdersPage() {
 
   const [selectedOrder, setSelectedOrder] = useState<OrderDataType | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const filteredOrders = allOrders.filter((order) => {
     const matchesSearch =
@@ -141,13 +142,12 @@ export default function OrdersPage() {
     setIsDrawerOpen(true)
   }
 
-  // Purely structured layout parameters to maintain strict structural grid cohesion
   const columns: ColumnsType<OrderDataType> = [
     {
       title: 'Order ID',
       dataIndex: 'id',
       key: 'id',
-      width: 160,
+      width: 140,
       align: 'left',
       className: 'text-xs font-bold text-slate-900 font-mono tracking-tight pl-4',
     },
@@ -155,7 +155,6 @@ export default function OrdersPage() {
       title: 'Customer Dealer / Farm',
       dataIndex: 'customer',
       key: 'customer',
-      width: 250,
       align: 'left',
       ellipsis: true,
       className: 'text-xs font-semibold text-slate-800',
@@ -180,12 +179,12 @@ export default function OrdersPage() {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      width: 140,
+      width: 120,
       align: 'left',
       render: (status: string) => {
         const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending
         return (
-          <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-slate-50 border border-slate-200/80 text-slate-700 font-semibold text-[11px] tracking-wide">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200/80 text-slate-700 font-semibold text-[11px] tracking-wide">
             <span className={`w-1.5 h-1.5 rounded-full ${config.dotColor}`} />
             {config.label}
           </span>
@@ -196,10 +195,10 @@ export default function OrdersPage() {
       title: 'Gross Total',
       dataIndex: 'total',
       key: 'total',
-      width: 140,
+      width: 120,
       align: 'right',
       render: (value: number) => (
-        <span className="font-bold text-slate-900 text-xs tracking-tight pr-2">
+        <span className="font-bold text-slate-900 text-xs tracking-tight pr-4">
           ৳ {value.toLocaleString('en-IN')}
         </span>
       ),
@@ -207,7 +206,7 @@ export default function OrdersPage() {
     {
       title: 'Action',
       key: 'action',
-      width: 80,
+      width: 65,
       align: 'center',
       render: (_, record) => (
         <Button
@@ -222,13 +221,14 @@ export default function OrdersPage() {
 
   return (
     <div className="flex h-screen bg-[#EAEFF4]">
-      <Sidebar />
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <main className="flex-1 overflow-auto md:ml-0 flex flex-col">
+      <main className="flex-1 overflow-auto md:ml-0 flex flex-col w-full">
         <div className="bg-[#23496b] text-white shrink-0">
           <Header
             title="SalesSense"
             subtitle="Navigate To Your Menu"
+            onMenuToggle={() => setSidebarOpen(true)}
             actions={
               <button className="flex items-center gap-2 px-3 py-1.5 bg-[#23496b]/30 hover:bg-[#152842]/50 text-white border border-white/20 rounded-sm font-bold text-xs tracking-wide transition-colors">
                 <Download className="w-3.5 h-3.5" />
@@ -238,26 +238,26 @@ export default function OrdersPage() {
           />
         </div>
 
-        <div className="bg-white border-b border-slate-200 px-6 py-2.5 flex items-center gap-2 text-xs text-slate-500 font-medium shrink-0">
-          <Home className="w-3.5 h-3.5 text-blue-800" />
+        <div className="bg-white border-b border-slate-200 px-4 sm:px-6 py-2.5 flex items-center gap-2 text-xs text-slate-500 font-medium shrink-0 overflow-x-auto whitespace-nowrap scrollbar-none">
+          <Home className="w-3.5 h-3.5 text-blue-800 shrink-0" />
           <span className="text-blue-800 font-semibold hover:underline cursor-pointer">Home</span>
-          <ChevronRight className="w-3 h-3 text-slate-400" />
+          <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
           <span className="text-blue-800 font-semibold hover:underline cursor-pointer">Sales</span>
-          <ChevronRight className="w-3 h-3 text-slate-400" />
+          <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
           <span className="text-slate-600">Order Management</span>
         </div>
 
-        <div className="p-6 space-y-4 flex-1 overflow-auto">
+        <div className="p-4 sm:p-6 space-y-4 flex-1 overflow-auto w-full">
           <div className="bg-white rounded-md border border-slate-200 p-4 space-y-3.5 shadow-xs">
             <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1">
+              <div className="flex-1 w-full">
                 <Input
                   prefix={<Search className="w-3.5 h-3.5 text-slate-400 mr-1" />}
                   placeholder="Filter parameters by Order reference ID or Bangladeshi customer node..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   allowClear
-                  className="rounded-sm text-xs h-9"
+                  className="rounded-sm text-xs h-9 w-full"
                 />
               </div>
 
@@ -277,11 +277,11 @@ export default function OrdersPage() {
               />
             </div>
 
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 border-t border-slate-100 pt-3">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-2">Nodes:</span>
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 border-t border-slate-100 pt-3 scrollbar-thin">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-2 shrink-0">Nodes:</span>
               <button
                 onClick={() => setSelectedStatus(null)}
-                className={`px-3 py-1 rounded-sm text-[11px] font-bold transition-all uppercase tracking-wide ${!selectedStatus
+                className={`px-3 py-1 rounded-sm text-[11px] font-bold transition-all uppercase tracking-wide shrink-0 ${!selectedStatus
                   ? 'bg-[#23496b] text-white border border-[#23496b]'
                   : 'bg-slate-100 text-slate-600 border border-slate-200/60 hover:bg-slate-200'
                   }`}
@@ -292,7 +292,7 @@ export default function OrdersPage() {
                 <button
                   key={status}
                   onClick={() => setSelectedStatus(status)}
-                  className={`px-3 py-1 rounded-sm text-[11px] font-bold uppercase transition-all tracking-wide ${selectedStatus === status
+                  className={`px-3 py-1 rounded-sm text-[11px] font-bold uppercase transition-all tracking-wide shrink-0 ${selectedStatus === status
                     ? 'bg-[#23496b] text-white border border-[#23496b]'
                     : 'bg-slate-100 text-slate-600 border border-slate-200/60 hover:bg-slate-200'
                     }`}
@@ -303,7 +303,7 @@ export default function OrdersPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-md border border-slate-200 overflow-hidden shadow-xs">
+          <div className="hidden md:block bg-white rounded-md border border-slate-200 shadow-xs overflow-hidden">
             <Table
               columns={columns}
               dataSource={sortedOrders}
@@ -317,6 +317,52 @@ export default function OrdersPage() {
               }}
               locale={{ emptyText: 'No localized logistics accounts mapped to this query.' }}
             />
+          </div>
+
+          <div className="block md:hidden space-y-3">
+            {sortedOrders.map((order) => {
+              const config = statusConfig[order.status as keyof typeof statusConfig] || statusConfig.pending
+              return (
+                <div 
+                  key={order.id} 
+                  className="bg-white border border-slate-200 rounded-md p-4 shadow-2xs space-y-3"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black text-slate-900 font-mono tracking-tight">{order.id}</span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm bg-slate-50 border border-slate-200/80 text-slate-700 font-bold text-[10px] tracking-wide">
+                      <span className={`w-1 h-1 rounded-full ${config.dotColor}`} />
+                      {config.label}
+                    </span>
+                  </div>
+
+                  <div className="space-y-1">
+                    <p className="text-xs font-bold text-slate-800 line-clamp-1">{order.customer}</p>
+                    <p className="text-[11px] text-slate-500 font-medium line-clamp-1">{order.items}</p>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2.5 border-t border-slate-100">
+                    <div>
+                      <span className="text-[9px] text-slate-400 font-bold uppercase block tracking-wider">Gross Total</span>
+                      <span className="text-xs font-black text-slate-900">৳ {order.total.toLocaleString('en-IN')}</span>
+                    </div>
+                    <Button
+                      type="default"
+                      size="small"
+                      icon={<Eye className="w-3.5 h-3.5 text-slate-600" />}
+                      onClick={() => handleOpenDrawer(order)}
+                      className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 h-8 bg-slate-50 border-slate-200"
+                    >
+                      View Details
+                    </Button>
+                  </div>
+                </div>
+              )
+            })}
+            {sortedOrders.length === 0 && (
+              <div className="bg-white rounded-md border border-slate-200 p-8 text-center text-xs text-slate-400">
+                No localized logistics accounts mapped to this query.
+              </div>
+            )}
           </div>
         </div>
       </main>
@@ -334,10 +380,11 @@ export default function OrdersPage() {
           </div>
         }
         placement="right"
-        size={500} // FIXED: Reverted back to custom numeric system token requirement
+        width={typeof window !== 'undefined' && window.innerWidth < 640 ? '100%' : 500}
         onClose={() => setIsDrawerOpen(false)}
         open={isDrawerOpen}
-        styles={{ body: { padding: '20px' } }}
+        styles={{ body: { padding: '16px sm:padding:20px' } }}
+        className="max-w-full"
         extra={
           <Space>
             <Button size="small" type="default" className="text-xs font-bold rounded-sm hover:border-[#23496b]! hover:text-[#23496b]!">Print Invoice</Button>
@@ -349,10 +396,10 @@ export default function OrdersPage() {
             <div>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">Logistics Scope Statement</p>
               <div className="bg-slate-50 border border-slate-200 rounded-sm p-3 space-y-3">
-                <div className="grid grid-cols-2 gap-y-3 gap-x-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-4">
                   <div>
                     <span className="text-slate-400 block font-medium items-center gap-1">
-                      <FileText className="w-3 h-3 text-slate-400" /> Dealer Account
+                      <FileText className="w-3 h-3 text-slate-400 inline mr-1" /> Dealer Account
                     </span>
                     <span className="font-bold text-slate-800">{selectedOrder.customer}</span>
                   </div>
@@ -362,13 +409,13 @@ export default function OrdersPage() {
                   </div>
                   <div>
                     <span className="text-slate-400 block font-medium items-center gap-1">
-                      <Calendar className="w-3 h-3 text-slate-400" /> Staged Date
+                      <Calendar className="w-3 h-3 text-slate-400 inline mr-1" /> Staged Date
                     </span>
                     <span className="font-bold text-slate-700">{selectedOrder.date}</span>
                   </div>
                   <div>
                     <span className="text-slate-400 block font-medium items-center gap-1">
-                      <DollarSign className="w-3 h-3 text-slate-400" /> Settlement Protocol
+                      <DollarSign className="w-3 h-3 text-slate-400 inline mr-1" /> Settlement Protocol
                     </span>
                     <span className="font-bold text-slate-800">{selectedOrder.paymentMethod}</span>
                   </div>
@@ -389,12 +436,12 @@ export default function OrdersPage() {
                   </div>
                 </div>
                 <Divider className="my-1.5" />
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                   <div>
                     <span className="text-slate-400 block font-medium">Dispatched Freight Mode</span>
                     <span className="font-bold text-slate-800">{selectedOrder.shippingMethod}</span>
                   </div>
-                  <span className="inline-flex items-center px-2 py-0.5 font-bold text-[9px] uppercase border border-slate-200 rounded-sm bg-slate-50 text-slate-600">Authorized Fleet</span>
+                  <span className="inline-flex items-center self-start sm:self-auto px-2 py-0.5 font-bold text-[9px] uppercase border border-slate-200 rounded-sm bg-slate-50 text-slate-600">Authorized Fleet</span>
                 </div>
               </div>
             </div>
@@ -403,13 +450,13 @@ export default function OrdersPage() {
               <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                 <ShoppingBag className="w-3.5 h-3.5" /> Product Dispatches
               </h3>
-              <div className="border border-slate-200 rounded-sm overflow-hidden bg-white">
-                <table className="w-full text-xs">
+              <div className="border border-slate-200 rounded-sm overflow-hidden bg-white overflow-x-auto">
+                <table className="w-full text-xs min-w-95">
                   <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
                     <tr>
                       <th className="px-3 py-2 text-left">Product Item</th>
                       <th className="px-3 py-2 text-center">Bags</th>
-                      <th className="px-3 py-2 text-right">Unit Price</th>
+                      <th className="px-3 py-2 text-right">Unit</th>
                       <th className="px-3 py-2 text-right">Total</th>
                     </tr>
                   </thead>
