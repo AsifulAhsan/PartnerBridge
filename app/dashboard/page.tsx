@@ -148,16 +148,17 @@ export default function Dashboard() {
       render: (val: number) => <span className="font-bold text-slate-900">৳ {val.toLocaleString('en-IN')}</span>,
     },
   ]
-
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
     <div className="flex h-screen bg-[#EAEFF4]">
-      <Sidebar />
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <main className="flex-1 overflow-auto md:ml-0">
         <div className="bg-[#1F3A60] text-white">
           <Header
-            title="Business Analytics Console"
+            title="Business to Business Order Management System"
             subtitle="Regional distribution node operations and liquidity tracking metrics"
+            onMenuToggle={() => setSidebarOpen(true)}
           />
         </div>
 
@@ -171,8 +172,6 @@ export default function Dashboard() {
         </div>
 
         <div className="p-4 sm:p-6 space-y-6">
-
-          {/* SALESENSE CLEAN MULTI-CARD GRID MATRIX */}
           <Row gutter={[12, 12]}>
             <Col xs={24} sm={12} lg={6}>
               <Card
