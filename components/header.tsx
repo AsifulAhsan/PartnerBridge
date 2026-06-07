@@ -57,7 +57,7 @@ export function Header({ title, subtitle, actions, onMenuToggle }: HeaderProps) 
                   R
                 </div>
                 <span className="text-xs font-semibold hidden md:inline-block max-w-22.5 truncate">
-                  Rafiul Islam
+                  MD Zakir
                 </span>
                 <ChevronDown className="w-3 h-3 text-blue-300 shrink-0" />
               </button>
@@ -65,8 +65,8 @@ export function Header({ title, subtitle, actions, onMenuToggle }: HeaderProps) 
               {showProfile && (
                 <div className="absolute top-10 right-0 bg-white border border-slate-200 rounded shadow-xl py-1 w-48 text-slate-800 z-50 animate-in fade-in duration-100">
                   <div className="px-4 py-2 border-b border-slate-100 bg-slate-50">
-                    <p className="text-xs font-bold text-slate-900">Rafiul Islam</p>
-                    <p className="text-[10px] text-slate-400">Regional Node Admin</p>
+                    <p className="text-xs font-bold text-slate-900">MD Zakir</p>
+                    <p className="text-[10px] text-slate-400">Dealer</p>
                   </div>
                   <a href="#" className="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">My Profile</a>
                   <a href="#" className="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">Account Settings</a>
