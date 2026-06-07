@@ -2,138 +2,414 @@
 
 import { Sidebar } from '@/components/sidebar'
 import { Header } from '@/components/header'
-import { Search, Download, Eye, Filter } from 'lucide-react'
-import { useState } from 'react'
+import { Search, Download, Eye, ChevronRight, Home } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import {
+  Table,
+  Input,
+  Button,
+  Drawer,
+  Space,
+  Divider,
+  Spin,
+  message,
+  Tag,
+} from 'antd'
+import type { ColumnsType } from 'antd/es/table'
+import axios from 'axios'
+import { ACCESS_TOKEN, paymentTerms } from '@/lib/values'
 
-const invoices = [
-  {
-    id: 'INV-2024-0856',
-    orderIds: ['ORD-2024-00156'],
-    date: '2024-06-06',
-    dueDate: '2024-06-20',
-    amount: '$449.95',
-    status: 'paid',
-    customer: 'Springfield Farm',
-  },
-  {
-    id: 'INV-2024-0855',
-    orderIds: ['ORD-2024-00155'],
-    date: '2024-06-05',
-    dueDate: '2024-06-19',
-    amount: '$320.00',
-    status: 'pending',
-    customer: 'Riverside Hatchery',
-  },
-  {
-    id: 'INV-2024-0854',
-    orderIds: ['ORD-2024-00154'],
-    date: '2024-06-05',
-    dueDate: '2024-06-19',
-    amount: '$179.97',
-    status: 'overdue',
-    customer: 'Premium Livestock',
-  },
-  {
-    id: 'INV-2024-0853',
-    orderIds: ['ORD-2024-00153'],
-    date: '2024-06-04',
-    dueDate: '2024-06-18',
-    amount: '$239.92',
-    status: 'pending',
-    customer: 'Green Pastures',
-  },
-  {
-    id: 'INV-2024-0852',
-    orderIds: ['ORD-2024-00152'],
-    date: '2024-06-04',
-    dueDate: '2024-06-18',
-    amount: '$287.50',
-    status: 'paid',
-    customer: 'Mountain View Farm',
-  },
-  {
-    id: 'INV-2024-0851',
-    orderIds: ['ORD-2024-00151'],
-    date: '2024-06-03',
-    dueDate: '2024-06-17',
-    amount: '$507.50',
-    status: 'paid',
-    customer: 'Sunny Valley Ranch',
-  },
-]
+const API_BASE = 'https://api.salesense.logiqbits.com'
+const CREDIT_DAYS = paymentTerms[0]?.creditPeriodDays ?? 30
 
-const statusConfig = {
-  paid: { bg: 'bg-green-100', text: 'text-green-800', label: 'Paid' },
-  pending: { bg: 'bg-orange-100', text: 'text-orange-800', label: 'Pending' },
-  overdue: { bg: 'bg-red-100', text: 'text-red-800', label: 'Overdue' },
+interface CollectionItem {
+  id: number
+  serial: number
+  amount: number
+  collectDate: string
+  depositDate: string
+  paymentMethod: string
+  bankName: string
+  bankBranchName: string
+  payerName: string
+  payerPhone: string
+  note: string
+  isVerified: boolean
+}
+
+interface InvoiceDataType {
+  id: string
+  serial: number
+  date: string
+  dueDate: string
+  amount: number
+  paidAmount: number
+  dueAmount: number
+  status: string
+  customer: string
+  reference: string
+  rawDate: number
+}
+
+const statusConfig: Record<string, { bg: string; text: string; label: string; dotColor?: string }> = {
+  O: { bg: 'bg-orange-100', text: 'text-orange-800', label: 'Open', dotColor: 'bg-amber-500' },
+  C: { bg: 'bg-slate-100', text: 'text-slate-800', label: 'Closed', dotColor: 'bg-slate-400' },
+  P: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Partial', dotColor: 'bg-blue-500' },
+  D: { bg: 'bg-emerald-100', text: 'text-emerald-800', label: 'Paid', dotColor: 'bg-emerald-500' },
+}
+
+function formatDate(ts: number | string): string {
+  const n = typeof ts === 'string' ? parseInt(ts, 10) : ts
+  if (!n) return '-'
+  const d = new Date(n)
+  return d.toLocaleDateString('en-CA')
+}
+
+function addDays(ts: number, days: number): string {
+  const d = new Date(ts)
+  d.setDate(d.getDate() + days)
+  return d.toLocaleDateString('en-CA')
+}
+
+function resolveStatus(invoice: any): string {
+  const s = (invoice.status || '').toUpperCase().trim()
+  if (['O', 'C', 'P', 'D'].includes(s)) return s
+  // Fallback mapping from old/verbose status values
+  const lower = s.toLowerCase()
+  if (lower.includes('PAID') || lower.includes('D')) return 'D'
+  if (lower.includes('PARTIAL') || lower.includes('P')) return 'P'
+  if (lower.includes('CLOSE') || lower.includes('C')) return 'C'
+  if (lower.includes('OPEN') || lower.includes('O')) return 'O'
+  // Derive from amounts if status is missing
+  const due = invoice.totalDueAmount ?? (invoice.totalAmount - (invoice.totalPaidAmount || 0))
+  if (due <= 0) return 'D'
+  if ((invoice.totalPaidAmount || 0) > 0) return 'P'
+  return 'O'
 }
 
 export default function InvoicesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
 
+  const [invoices, setInvoices] = useState<InvoiceDataType[]>([])
+  const [loading, setLoading] = useState(false)
+
+  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceDataType | null>(null)
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [collections, setCollections] = useState<CollectionItem[]>([])
+  const [drawerLoading, setDrawerLoading] = useState(false)
+  const [downloadingPdfId, setDownloadingPdfId] = useState<string | null>(null)
+  const [downloadingCollectionId, setDownloadingCollectionId] = useState<number | null>(null)
+
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  const downloadInvoicePdf = async (invoiceId: string) => {
+    const numericId = invoiceId.replace('INV-', '')
+    setDownloadingPdfId(invoiceId)
+    try {
+      const res = await axios.get(
+        `${API_BASE}/export/pdf/invoices/${numericId}`,
+        {
+          headers: { Authorization: `Bearer ${ACCESS_TOKEN}` },
+          responseType: 'blob',
+        }
+      )
+      const blob = new Blob([res.data], { type: 'application/pdf' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `invoice-${invoiceId}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      message.success('Invoice PDF downloaded successfully')
+    } catch (err: any) {
+      message.error(
+        `Download failed: ${err?.response?.data?.message || err?.message || 'Unknown error'}`
+      )
+    } finally {
+      setDownloadingPdfId(null)
+    }
+  }
+
+  const downloadCollectionPdf = async (collectionId: number) => {
+    setDownloadingCollectionId(collectionId)
+    try {
+      const res = await axios.get(
+        `${API_BASE}/export/pdf/collections/${collectionId}`,
+        {
+          headers: { Authorization: `Bearer ${ACCESS_TOKEN}` },
+          responseType: 'blob',
+        }
+      )
+      const blob = new Blob([res.data], { type: 'application/pdf' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `collection-${collectionId}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      message.success('Collection PDF downloaded successfully')
+    } catch (err: any) {
+      message.error(
+        `Download failed: ${err?.response?.data?.message || err?.message || 'Unknown error'}`
+      )
+    } finally {
+      setDownloadingCollectionId(null)
+    }
+  }
+
+  const fetchInvoices = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await axios.get(`${API_BASE}/me-user/area-invoices`, {
+        headers: { Authorization: `Bearer ${ACCESS_TOKEN}` },
+      })
+      const data = Array.isArray(res.data) ? res.data : res.data?.data ?? []
+      const mapped: InvoiceDataType[] = data.map((inv: any) => {
+        const rawDate = inv.date || 0
+        const status = resolveStatus(inv)
+        return {
+          id: `INV-${inv.id ?? inv.serial ?? Math.floor(Math.random() * 900000)}`,
+          serial: inv.serial ?? inv.id,
+          date: formatDate(rawDate),
+          dueDate: addDays(rawDate, CREDIT_DAYS),
+          amount: inv.totalAmount ?? 0,
+          paidAmount: inv.totalPaidAmount ?? 0,
+          dueAmount: inv.totalDueAmount ?? (inv.totalAmount - (inv.totalPaidAmount || 0)),
+          status,
+          customer: inv.customerName || 'Unknown Customer',
+          reference: inv.reference || '-',
+          rawDate,
+        }
+      })
+      setInvoices(mapped)
+    } catch (err: any) {
+      message.error(
+        `Failed to load invoices: ${err?.response?.data?.message || err?.message || 'Unknown error'}`
+      )
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchInvoices()
+  }, [fetchInvoices])
+
+  const fetchCollections = async (invoiceId: string) => {
+    const numericId = invoiceId.replace('INV-', '')
+    setDrawerLoading(true)
+    try {
+      const res = await axios.get(`${API_BASE}/invoices/${numericId}/collections`, {
+        headers: { Authorization: `Bearer ${ACCESS_TOKEN}` },
+      })
+      const data = Array.isArray(res.data) ? res.data : res.data?.data ?? []
+      const mapped: CollectionItem[] = data.map((c: any) => ({
+        id: c.id,
+        serial: c.serial,
+        amount: c.amount ?? 0,
+        collectDate: formatDate(c.collectDate),
+        depositDate: formatDate(c.depositDate),
+        paymentMethod: c.paymentMethod || '-',
+        bankName: c.bankName || '-',
+        bankBranchName: c.bankBranchName || '-',
+        payerName: c.payerName || '-',
+        payerPhone: c.payerPhone || '-',
+        note: c.note || '',
+        isVerified: c.isVerified ?? false,
+      }))
+      setCollections(mapped)
+    } catch (err: any) {
+      setCollections([])
+    } finally {
+      setDrawerLoading(false)
+    }
+  }
+
   const filteredInvoices = invoices.filter((invoice) => {
     const matchesSearch =
       invoice.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       invoice.customer.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesStatus = !selectedStatus || invoice.status === selectedStatus
-
+    const matchesStatus =
+      !selectedStatus || invoice.status === selectedStatus
     return matchesSearch && matchesStatus
   })
 
+  const statuses = ['O', 'P', 'D', 'C']
+
+  const handleOpenDrawer = (invoice: InvoiceDataType) => {
+    setSelectedInvoice(invoice)
+    setIsDrawerOpen(true)
+    fetchCollections(invoice.id)
+  }
+
+  const columns: ColumnsType<InvoiceDataType> = [
+    {
+      title: 'Invoice ID',
+      dataIndex: 'id',
+      key: 'id',
+      width: 140,
+      align: 'left',
+      className: 'text-xs font-bold text-slate-900 font-mono tracking-tight pl-4',
+    },
+    {
+      title: 'Customer',
+      dataIndex: 'customer',
+      key: 'customer',
+      align: 'left',
+      ellipsis: true,
+      className: 'text-xs font-semibold text-slate-800',
+    },
+    {
+      title: 'Date',
+      dataIndex: 'date',
+      key: 'date',
+      width: 110,
+      align: 'left',
+      className: 'text-xs text-slate-500 font-medium',
+    },
+    {
+      title: 'Due Date',
+      dataIndex: 'dueDate',
+      key: 'dueDate',
+      width: 110,
+      align: 'left',
+      className: 'text-xs text-slate-500 font-medium',
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      width: 110,
+      align: 'left',
+      render: (status: string) => {
+        const config =
+          statusConfig[status as keyof typeof statusConfig] ||
+          statusConfig.pending
+        return (
+          <span
+            className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200/80 text-slate-700 font-semibold text-[11px] tracking-wide`}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${config.dotColor}`} />
+            {config.label}
+          </span>
+        )
+      },
+    },
+    {
+      title: 'Amount',
+      dataIndex: 'amount',
+      key: 'amount',
+      width: 120,
+      align: 'right',
+      render: (value: number) => (
+        <span className="font-bold text-slate-900 text-xs tracking-tight pr-4">
+          TK {value.toLocaleString('en-IN')}
+        </span>
+      ),
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      width: 100,
+      align: 'center',
+      render: (_, record) => (
+        <div className="flex items-center justify-center gap-1">
+          <Button
+            type="default"
+            icon={<Eye className="w-3.5 h-3.5 text-slate-500" />}
+            onClick={() => handleOpenDrawer(record)}
+            className="inline-flex items-center justify-center rounded-sm w-7 h-7 bg-white shadow-xs hover:border-slate-300"
+            title="View details"
+          />
+          <Button
+            type="default"
+            icon={<Download className="w-3.5 h-3.5 text-slate-500" />}
+            loading={downloadingPdfId === record.id}
+            onClick={() => downloadInvoicePdf(record.id)}
+            className="inline-flex items-center justify-center rounded-sm w-7 h-7 bg-white shadow-xs hover:border-slate-300"
+            title="Download PDF"
+          />
+        </div>
+      ),
+    },
+  ]
+
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar />
+    <div className="flex h-screen bg-[#EAEFF4]">
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <main className="flex-1 overflow-auto md:ml-0">
-        <Header
-          title="Invoice Center"
-          subtitle="View and download your invoices"
-          actions={
-            <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold">
-              <Download className="w-4 h-4" />
-              Download All
-            </button>
-          }
-        />
+      <main className="flex-1 overflow-auto md:ml-0 flex flex-col w-full">
+        <div className="bg-[#23496b] text-white shrink-0">
+          <Header
+            title="Invoice Center"
+            subtitle="View and manage your invoices"
+            onMenuToggle={() => setSidebarOpen(true)}
+            actions={
+              <button className="flex items-center gap-2 px-3 py-1.5 bg-[#23496b]/30 hover:bg-[#152842]/50 text-white border border-white/20 rounded-sm font-bold text-xs tracking-wide transition-colors">
+                <Download className="w-3.5 h-3.5" />
+                Export Channel Data
+              </button>
+            }
+          />
+        </div>
 
-        <div className="p-6 md:p-8 space-y-6">
-          {/* Filter Section */}
-          <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-4">
+        <div className="bg-white border-b border-slate-200 px-4 sm:px-6 py-2.5 flex items-center gap-2 text-xs text-slate-500 font-medium shrink-0 overflow-x-auto whitespace-nowrap scrollbar-none">
+          <Home className="w-3.5 h-3.5 text-blue-800 shrink-0" />
+          <span className="text-blue-800 font-semibold hover:underline cursor-pointer">
+            Home
+          </span>
+          <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
+          <span className="text-blue-800 font-semibold hover:underline cursor-pointer">
+            Sales
+          </span>
+          <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
+          <span className="text-slate-600">Invoice Center</span>
+        </div>
+
+        <div className="p-4 sm:p-6 space-y-4 flex-1 overflow-auto w-full">
+          <div className="bg-white rounded-md border border-slate-200 p-4 space-y-3.5 shadow-xs">
             <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search invoices by ID or customer..."
+              <div className="flex-1 w-full">
+                <Input
+                  prefix={
+                    <Search className="w-3.5 h-3.5 text-slate-400 mr-1" />
+                  }
+                  placeholder="Search invoices by ID or customer name..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                  allowClear
+                  className="rounded-sm text-xs h-9 w-full"
                 />
               </div>
             </div>
 
-            {/* Status Filters */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2">
-              <Filter className="w-4 h-4 text-gray-500 flex-shrink-0" />
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 border-t border-slate-100 pt-3 scrollbar-thin">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-2 shrink-0">
+                Status:
+              </span>
               <button
                 onClick={() => setSelectedStatus(null)}
-                className={`px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                className={`px-3 py-1 rounded-sm text-[11px] font-bold transition-all uppercase tracking-wide shrink-0 ${
                   !selectedStatus
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'bg-[#23496b] text-white border border-[#23496b]'
+                    : 'bg-slate-100 text-slate-600 border border-slate-200/60 hover:bg-slate-200'
                 }`}
               >
                 All Invoices
               </button>
-              {['paid', 'pending', 'overdue'].map((status) => (
+              {statuses.map((status) => (
                 <button
                   key={status}
                   onClick={() => setSelectedStatus(status)}
-                  className={`px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                  className={`px-3 py-1 rounded-sm text-[11px] font-bold uppercase transition-all tracking-wide shrink-0 ${
                     selectedStatus === status
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      ? 'bg-[#23496b] text-white border border-[#23496b]'
+                      : 'bg-slate-100 text-slate-600 border border-slate-200/60 hover:bg-slate-200'
                   }`}
                 >
                   {statusConfig[status as keyof typeof statusConfig].label}
@@ -142,87 +418,310 @@ export default function InvoicesPage() {
             </div>
           </div>
 
-          {/* Invoices Table */}
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b border-gray-200 bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700">
-                      Invoice ID
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700">
-                      Customer
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700">
-                      Date
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700">
-                      Due Date
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700">
-                      Status
-                    </th>
-                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700">
-                      Amount
-                    </th>
-                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {filteredInvoices.map((invoice) => {
-                    const config = statusConfig[invoice.status as keyof typeof statusConfig]
-                    return (
-                      <tr key={invoice.id} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-4">
-                          <span className="font-semibold text-gray-900">{invoice.id}</span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-gray-700">{invoice.customer}</span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-gray-600 text-sm">{invoice.date}</span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-gray-600 text-sm">{invoice.dueDate}</span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span
-                            className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${config.bg} ${config.text}`}
-                          >
-                            {config.label}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <span className="font-bold text-gray-900">{invoice.amount}</span>
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <div className="flex items-center justify-center gap-2">
-                            <button className="inline-flex items-center justify-center w-8 h-8 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">
-                              <Eye className="w-4 h-4" />
-                            </button>
-                            <button className="inline-flex items-center justify-center w-8 h-8 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">
-                              <Download className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
+          <div className="hidden md:block bg-white rounded-md border border-slate-200 shadow-xs overflow-hidden">
+            <Spin spinning={loading}>
+              <Table
+                columns={columns}
+                dataSource={filteredInvoices}
+                rowKey="id"
+                size="middle"
+                pagination={{
+                  pageSize: 5,
+                  showSizeChanger: false,
+                  placement: ['bottomRight'] as any,
+                  className:
+                    'px-4 py-3 m-0 border-t border-slate-100 text-xs font-medium',
+                }}
+                locale={{ emptyText: 'No invoices found.' }}
+              />
+            </Spin>
+          </div>
 
-            {filteredInvoices.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-gray-500">No invoices found</p>
+          <div className="block md:hidden space-y-3">
+            {filteredInvoices.map((invoice) => {
+              const config =
+                statusConfig[invoice.status as keyof typeof statusConfig] ||
+                statusConfig.pending
+              return (
+                <div
+                  key={invoice.id}
+                  className="bg-white border border-slate-200 rounded-md p-4 shadow-2xs space-y-3"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black text-slate-900 font-mono tracking-tight">
+                      {invoice.id}
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm bg-slate-50 border border-slate-200/80 text-slate-700 font-bold text-[10px] tracking-wide">
+                      <span className={`w-1 h-1 rounded-full ${config.dotColor}`} />
+                      {config.label}
+                    </span>
+                  </div>
+
+                  <div className="space-y-1">
+                    <p className="text-xs font-bold text-slate-800 line-clamp-1">
+                      {invoice.customer}
+                    </p>
+                    <p className="text-[11px] text-slate-500 font-medium line-clamp-1">
+                      Ref: {invoice.reference} | Due: {invoice.dueDate}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2.5 border-t border-slate-100">
+                    <div>
+                      <span className="text-[9px] text-slate-400 font-bold uppercase block tracking-wider">
+                        Amount
+                      </span>
+                      <span className="text-xs font-black text-slate-900">
+                        TK {invoice.amount.toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        type="default"
+                        size="small"
+                        icon={<Eye className="w-3.5 h-3.5 text-slate-600" />}
+                        onClick={() => handleOpenDrawer(invoice)}
+                        className="inline-flex items-center justify-center w-7 h-7 bg-slate-50 border-slate-200"
+                        title="View details"
+                      />
+                      <Button
+                        type="default"
+                        size="small"
+                        loading={downloadingPdfId === invoice.id}
+                        icon={<Download className="w-3.5 h-3.5 text-slate-600" />}
+                        onClick={() => downloadInvoicePdf(invoice.id)}
+                        className="inline-flex items-center justify-center w-7 h-7 bg-slate-50 border-slate-200"
+                        title="Download PDF"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+            {filteredInvoices.length === 0 && !loading && (
+              <div className="bg-white rounded-md border border-slate-200 p-8 text-center text-xs text-slate-400">
+                No invoices found.
               </div>
             )}
           </div>
         </div>
       </main>
+
+      <Drawer
+        title={
+          <div className="flex items-center gap-2">
+            <span className="font-mono font-black text-slate-900 text-sm">
+              {selectedInvoice?.id}
+            </span>
+            {selectedInvoice && (
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-slate-100 border border-slate-200 text-slate-700 font-bold text-[10px] uppercase">
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    statusConfig[
+                      selectedInvoice.status as keyof typeof statusConfig
+                    ]?.dotColor
+                  }`}
+                />
+                {
+                  statusConfig[
+                    selectedInvoice.status as keyof typeof statusConfig
+                  ]?.label
+                }
+              </span>
+            )}
+          </div>
+        }
+        placement="right"
+        width={
+          typeof window !== 'undefined' && window.innerWidth < 640
+            ? '100%'
+            : 500
+        }
+        onClose={() => setIsDrawerOpen(false)}
+        open={isDrawerOpen}
+        styles={{ body: { padding: '16px sm:padding:20px' } }}
+        className="max-w-full"
+        extra={
+          <Space>
+            {selectedInvoice && (
+              <Button
+                size="small"
+                type="default"
+                icon={<Download className="w-3.5 h-3.5" />}
+                loading={downloadingPdfId === selectedInvoice.id}
+                onClick={() => downloadInvoicePdf(selectedInvoice.id)}
+                className="text-xs font-bold rounded-sm hover:border-[#23496b]! hover:text-[#23496b]!"
+              >
+                PDF
+              </Button>
+            )}
+            <Button
+              size="small"
+              type="default"
+              className="text-xs font-bold rounded-sm hover:border-[#23496b]! hover:text-[#23496b]!"
+            >
+              Print Invoice
+            </Button>
+          </Space>
+        }
+      >
+        {selectedInvoice && (
+          <div className="space-y-5 text-xs">
+            <div>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">
+                Invoice Summary
+              </p>
+              <div className="bg-slate-50 border border-slate-200 rounded-sm p-3 space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-4">
+                  <div>
+                    <span className="text-slate-400 block font-medium">
+                      Customer
+                    </span>
+                    <span className="font-bold text-slate-800">
+                      {selectedInvoice.customer}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block font-medium">
+                      Reference
+                    </span>
+                    <span className="font-bold text-slate-700 font-mono">
+                      {selectedInvoice.reference}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block font-medium">
+                      Invoice Date
+                    </span>
+                    <span className="font-bold text-slate-700">
+                      {selectedInvoice.date}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block font-medium">
+                      Due Date
+                    </span>
+                    <span className="font-bold text-slate-700">
+                      {selectedInvoice.dueDate}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-slate-50 border border-slate-200 rounded-sm p-3.5">
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-slate-500 font-medium">
+                  <span>Total Amount:</span>
+                  <span className="text-slate-900 font-bold">
+                    TK {selectedInvoice.amount.toLocaleString('en-IN')}
+                  </span>
+                </div>
+                <div className="flex justify-between text-slate-500 font-medium">
+                  <span>Paid Amount:</span>
+                  <span className="text-emerald-700 font-bold">
+                    TK {selectedInvoice.paidAmount.toLocaleString('en-IN')}
+                  </span>
+                </div>
+                <Divider dashed className="my-2" />
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-bold text-slate-900 uppercase tracking-wide">
+                    Due Balance:
+                  </span>
+                  <span className="text-sm font-black text-[#23496b]">
+                    TK {selectedInvoice.dueAmount.toLocaleString('en-IN')}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                Collection History
+              </h3>
+              <div className="border border-slate-200 rounded-sm overflow-hidden bg-white overflow-x-auto">
+                <Spin spinning={drawerLoading}>
+                  <table className="w-full text-xs min-w-95">
+                    <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
+                      <tr>
+                        <th className="px-3 py-2 text-left">Date</th>
+                        <th className="px-3 py-2 text-left">Payer</th>
+                        <th className="px-3 py-2 text-right">Amount</th>
+                        <th className="px-3 py-2 text-center">Verified</th>
+                        <th className="px-3 py-2 text-center">PDF</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+                      {collections.length > 0 ? (
+                        collections.map((c) => (
+                          <tr key={c.id} className="hover:bg-slate-50/50">
+                            <td className="px-3 py-2.5">
+                              <p className="font-bold text-slate-900">
+                                {c.collectDate}
+                              </p>
+                              <span className="text-[9px] text-slate-400 font-bold font-mono">
+                                {c.paymentMethod}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2.5">
+                              <p className="font-bold text-slate-900">
+                                {c.payerName}
+                              </p>
+                              <span className="text-[9px] text-slate-400 font-bold font-mono">
+                                {c.payerPhone}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2.5 text-right font-bold text-slate-900">
+                              TK {c.amount.toLocaleString('en-IN')}
+                            </td>
+                            <td className="px-3 py-2.5 text-center">
+                              {c.isVerified ? (
+                                <Tag
+                                  color="green"
+                                  className="m-0 text-[9px] font-bold rounded-sm border-none"
+                                >
+                                  Verified
+                                </Tag>
+                              ) : (
+                                <Tag
+                                  color="orange"
+                                  className="m-0 text-[9px] font-bold rounded-sm border-none"
+                                >
+                                  Pending
+                                </Tag>
+                              )}
+                            </td>
+                            <td className="px-3 py-2.5 text-center">
+                              <Button
+                                type="default"
+                                size="small"
+                                loading={downloadingCollectionId === c.id}
+                                icon={<Download className="w-3.5 h-3.5 text-slate-500" />}
+                                onClick={() => downloadCollectionPdf(c.id)}
+                                className="inline-flex items-center justify-center w-6 h-6 bg-white shadow-xs hover:border-slate-300"
+                                title="Download collection PDF"
+                              />
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan={5}
+                            className="px-3 py-4 text-center text-slate-400"
+                          >
+                            No collection records found.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </Spin>
+              </div>
+            </div>
+          </div>
+        )}
+      </Drawer>
     </div>
   )
 }

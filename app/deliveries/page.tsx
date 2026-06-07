@@ -2,130 +2,328 @@
 
 import { Sidebar } from '@/components/sidebar'
 import { Header } from '@/components/header'
-import { Search, MapPin, Phone, Calendar, Package, CheckCircle } from 'lucide-react'
-import { useState } from 'react'
+import {
+  Search,
+  MapPin,
+  Phone,
+  Calendar,
+  Package,
+  CheckCircle,
+  Truck,
+  Download,
+  ChevronRight,
+  Home,
+  FileText,
+} from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import {
+  Table,
+  Input,
+  Button,
+  Drawer,
+  Spin,
+  message,
+  Tag,
+  Divider,
+} from 'antd'
+import type { ColumnsType } from 'antd/es/table'
+import axios from 'axios'
+import { ACCESS_TOKEN } from '@/lib/values'
 
-const deliveries = [
-  {
-    id: 'DLV-2024-045',
-    orderId: 'ORD-2024-00155',
-    status: 'in-transit',
-    estimatedDelivery: '2024-06-07',
-    driver: 'John Martinez',
-    phone: '+1 (555) 123-4567',
-    vehicle: 'Truck #42',
-    items: '10x Poultry Starter Mix',
-    currentLocation: 'En route to Springfield',
-    lastUpdate: '2 hours ago',
-    progress: 65,
-  },
-  {
-    id: 'DLV-2024-046',
-    orderId: 'ORD-2024-00154',
-    status: 'processing',
-    estimatedDelivery: '2024-06-07',
-    driver: 'Sarah Johnson',
-    phone: '+1 (555) 234-5678',
-    vehicle: 'Van #12',
-    items: '3x Mineral & Vitamin Supplement',
-    currentLocation: 'Warehouse (Processing)',
-    lastUpdate: 'Just now',
-    progress: 20,
-  },
-  {
-    id: 'DLV-2024-044',
-    orderId: 'ORD-2024-00156',
-    status: 'delivered',
-    estimatedDelivery: '2024-06-06',
-    driver: 'Michael Chen',
-    phone: '+1 (555) 345-6789',
-    vehicle: 'Truck #38',
-    items: '5x Premium Cattle Feed',
-    currentLocation: 'Springfield Farm',
-    lastUpdate: '1 day ago',
-    progress: 100,
-  },
-  {
-    id: 'DLV-2024-043',
-    orderId: 'ORD-2024-00150',
-    status: 'in-transit',
-    estimatedDelivery: '2024-06-07',
-    driver: 'Patricia Williams',
-    phone: '+1 (555) 456-7890',
-    vehicle: 'Truck #41',
-    items: '6x Alfalfa Hay',
-    currentLocation: 'Route to Meadow Feeds',
-    lastUpdate: '30 minutes ago',
-    progress: 45,
-  },
-  {
-    id: 'DLV-2024-042',
-    orderId: 'ORD-2024-00152',
-    status: 'delivered',
-    estimatedDelivery: '2024-06-05',
-    driver: 'David Rodriguez',
-    phone: '+1 (555) 567-8901',
-    vehicle: 'Van #15',
-    items: '5x Layer Pellets, 3x Grain Mix',
-    currentLocation: 'Mountain View Farm',
-    lastUpdate: '2 days ago',
-    progress: 100,
-  },
-]
+const API_BASE = 'https://api.salesense.logiqbits.com'
 
-const statusConfig = {
-  pending: { bg: 'bg-gray-100', text: 'text-gray-800', icon: Package },
-  processing: { bg: 'bg-orange-100', text: 'text-orange-800', icon: Package },
-  'in-transit': { bg: 'bg-blue-100', text: 'text-blue-800', icon: MapPin },
-  delivered: { bg: 'bg-green-100', text: 'text-green-800', icon: CheckCircle },
+interface DeliveryItem {
+  productName: string
+  variantName: string
+  deliveredQty: number
+  unitPrice: number
+  subTotal: number
+  totalWithVat: number
+}
+
+interface DeliveryDataType {
+  id: string
+  serial: number
+  orderId: string
+  receiptNumber: string
+  status: string
+  deliveryDate: string
+  dispatcherName: string
+  vehicleNo: string
+  transporterInfo: string
+  note: string
+  items: DeliveryItem[]
+  rawDate: number
+}
+
+const statusConfig: Record<string, { dotColor: string; label: string; bg: string; text: string }> = {
+  PLN: { dotColor: 'bg-amber-500', label: 'Planned', bg: 'bg-amber-100', text: 'text-amber-800' },
+  DSP: { dotColor: 'bg-blue-500', label: 'Dispatched', bg: 'bg-blue-100', text: 'text-blue-800' },
+  DLV: { dotColor: 'bg-emerald-500', label: 'Delivered', bg: 'bg-emerald-100', text: 'text-emerald-800' },
+}
+
+function formatDate(ts: number | string): string {
+  const n = typeof ts === 'string' ? parseInt(ts, 10) : ts
+  if (!n) return '-'
+  const d = new Date(n)
+  return d.toLocaleDateString('en-CA')
+}
+
+function resolveStatus(status?: string): string {
+  if (!status) return 'PLN'
+  const s = status.toUpperCase().trim()
+  if (['PLN', 'DSP', 'DLV'].includes(s)) return s
+  // Fallback mapping from old/verbose status values
+  const lower = s.toLowerCase()
+  if (lower.includes('DELIVER')) return 'DLV'
+  if (lower.includes('DISPATCH')) return 'DSP'
+  if (lower.includes('PLAN')) return 'PLN'
+  return 'PLN'
 }
 
 export default function DeliveriesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
-  const [selectedDelivery, setSelectedDelivery] = useState<(typeof deliveries)[0] | null>(null)
 
-  const filteredDeliveries = deliveries.filter((delivery) => {
+  const [deliveries, setDeliveries] = useState<DeliveryDataType[]>([])
+  const [loading, setLoading] = useState(false)
+
+  const [selectedDelivery, setSelectedDelivery] = useState<DeliveryDataType | null>(null)
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [downloadingId, setDownloadingId] = useState<string | null>(null)
+
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  const fetchDeliveries = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await axios.get(`${API_BASE}/deliveries`, {
+        headers: { Authorization: `Bearer ${ACCESS_TOKEN}` },
+      })
+      const data = Array.isArray(res.data) ? res.data : res.data?.data ?? []
+      const mapped: DeliveryDataType[] = data.map((d: any) => ({
+        id: `DLV-${d.id ?? d.deliverySerial ?? Math.floor(Math.random() * 900000)}`,
+        serial: d.deliverySerial ?? d.id,
+        orderId: `ORD-${d.orderId ?? '-'}`,
+        receiptNumber: d.receiptNumber || '-',
+        status: resolveStatus(d.status),
+        deliveryDate: formatDate(d.deliveryDate),
+        dispatcherName: d.dispatcherName || 'N/A',
+        vehicleNo: d.vehicleNo || 'N/A',
+        transporterInfo: d.transporterInfo || 'N/A',
+        note: d.note || '',
+        items: Array.isArray(d.items)
+          ? d.items.map((it: any) => ({
+              productName: it.productName || 'Product',
+              variantName: it.variantName || '',
+              deliveredQty: it.deliveredQty ?? 0,
+              unitPrice: it.unitPrice ?? 0,
+              subTotal: it.subTotal ?? 0,
+              totalWithVat: it.totalWithVat ?? 0,
+            }))
+          : [],
+        rawDate: d.deliveryDate || 0,
+      }))
+      setDeliveries(mapped)
+    } catch (err: any) {
+      message.error(
+        `Failed to load deliveries: ${err?.response?.data?.message || err?.message || 'Unknown error'}`
+      )
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchDeliveries()
+  }, [fetchDeliveries])
+
+  const downloadChallan = async (deliveryId: string) => {
+    const numericId = deliveryId.replace('DLV-', '')
+    setDownloadingId(deliveryId)
+    try {
+      const res = await axios.get(
+        `${API_BASE}/deliveries/${numericId}/challan.pdf`,
+        {
+          headers: { Authorization: `Bearer ${ACCESS_TOKEN}` },
+          responseType: 'blob',
+        }
+      )
+      const blob = new Blob([res.data], { type: 'application/pdf' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `challan-${deliveryId}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      message.success('Challan downloaded successfully')
+    } catch (err: any) {
+      message.error(
+        `Download failed: ${err?.response?.data?.message || err?.message || 'Unknown error'}`
+      )
+    } finally {
+      setDownloadingId(null)
+    }
+  }
+
+  const filteredDeliveries = deliveries.filter((d) => {
     const matchesSearch =
-      delivery.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      delivery.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      delivery.driver.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesStatus = !selectedStatus || delivery.status === selectedStatus
-
+      d.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      d.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      d.dispatcherName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      d.vehicleNo.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesStatus = !selectedStatus || d.status === selectedStatus
     return matchesSearch && matchesStatus
   })
 
-  const statuses = ['processing', 'in-transit', 'delivered']
+  const statuses = ['PLN', 'DSP', 'DLV']
+
+  const handleOpenDrawer = (delivery: DeliveryDataType) => {
+    setSelectedDelivery(delivery)
+    setIsDrawerOpen(true)
+  }
+
+  const columns: ColumnsType<DeliveryDataType> = [
+    {
+      title: 'Delivery ID',
+      dataIndex: 'id',
+      key: 'id',
+      width: 140,
+      align: 'left',
+      className: 'text-xs font-bold text-slate-900 font-mono tracking-tight pl-4',
+    },
+    {
+      title: 'Order ID',
+      dataIndex: 'orderId',
+      key: 'orderId',
+      width: 130,
+      align: 'left',
+      className: 'text-xs font-semibold text-slate-800',
+    },
+    {
+      title: 'Delivery Date',
+      dataIndex: 'deliveryDate',
+      key: 'deliveryDate',
+      width: 120,
+      align: 'left',
+      className: 'text-xs text-slate-500 font-medium',
+    },
+    {
+      title: 'Vehicle',
+      dataIndex: 'vehicleNo',
+      key: 'vehicleNo',
+      width: 110,
+      align: 'left',
+      className: 'text-xs text-slate-500 font-medium',
+    },
+    {
+      title: 'Dispatcher',
+      dataIndex: 'dispatcherName',
+      key: 'dispatcherName',
+      align: 'left',
+      ellipsis: true,
+      className: 'text-xs text-slate-500 font-medium',
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      width: 120,
+      align: 'left',
+      render: (status: string) => {
+        const config =
+          statusConfig[status as keyof typeof statusConfig] ||
+          statusConfig.pending
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200/80 text-slate-700 font-semibold text-[11px] tracking-wide">
+            <span className={`w-1.5 h-1.5 rounded-full ${config.dotColor}`} />
+            {config.label}
+          </span>
+        )
+      },
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      width: 140,
+      align: 'center',
+      render: (_, record) => (
+        <div className="flex items-center justify-center gap-1">
+          <Button
+            type="default"
+            icon={<FileText className="w-3.5 h-3.5 text-slate-500" />}
+            onClick={() => handleOpenDrawer(record)}
+            className="inline-flex items-center justify-center rounded-sm w-7 h-7 bg-white shadow-xs hover:border-slate-300"
+            title="View details"
+          />
+          <Button
+            type="default"
+            icon={<Download className="w-3.5 h-3.5 text-slate-500" />}
+            loading={downloadingId === record.id}
+            onClick={() => downloadChallan(record.id)}
+            className="inline-flex items-center justify-center rounded-sm w-7 h-7 bg-white shadow-xs hover:border-slate-300"
+            title="Download challan"
+          />
+        </div>
+      ),
+    },
+  ]
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar />
+    <div className="flex h-screen bg-[#EAEFF4]">
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <main className="flex-1 overflow-auto md:ml-0">
-        <Header title="Delivery Tracking" subtitle="Real-time tracking of your shipments" />
+      <main className="flex-1 overflow-auto md:ml-0 flex flex-col w-full">
+        <div className="bg-[#23496b] text-white shrink-0">
+          <Header
+            title="Delivery Tracking"
+            subtitle="Real-time tracking of your shipments"
+            onMenuToggle={() => setSidebarOpen(true)}
+          />
+        </div>
 
-        <div className="p-6 md:p-8 space-y-6">
-          {/* Search and Filters */}
-          <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search by Delivery ID, Order ID, or Driver..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-              />
+        <div className="bg-white border-b border-slate-200 px-4 sm:px-6 py-2.5 flex items-center gap-2 text-xs text-slate-500 font-medium shrink-0 overflow-x-auto whitespace-nowrap scrollbar-none">
+          <Home className="w-3.5 h-3.5 text-blue-800 shrink-0" />
+          <span className="text-blue-800 font-semibold hover:underline cursor-pointer">
+            Home
+          </span>
+          <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
+          <span className="text-blue-800 font-semibold hover:underline cursor-pointer">
+            Operations
+          </span>
+          <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
+          <span className="text-slate-600">Delivery Tracking</span>
+        </div>
+
+        <div className="p-4 sm:p-6 space-y-4 flex-1 overflow-auto w-full">
+          <div className="bg-white rounded-md border border-slate-200 p-4 space-y-3.5 shadow-xs">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 w-full">
+                <Input
+                  prefix={
+                    <Search className="w-3.5 h-3.5 text-slate-400 mr-1" />
+                  }
+                  placeholder="Search by Delivery ID, Order ID, Vehicle or Dispatcher..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  allowClear
+                  className="rounded-sm text-xs h-9 w-full"
+                />
+              </div>
             </div>
 
-            {/* Status Filter */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 border-t border-slate-100 pt-3 scrollbar-thin">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-2 shrink-0">
+                Status:
+              </span>
               <button
                 onClick={() => setSelectedStatus(null)}
-                className={`px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                className={`px-3 py-1 rounded-sm text-[11px] font-bold transition-all uppercase tracking-wide shrink-0 ${
                   !selectedStatus
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'bg-[#23496b] text-white border border-[#23496b]'
+                    : 'bg-slate-100 text-slate-600 border border-slate-200/60 hover:bg-slate-200'
                 }`}
               >
                 All Shipments
@@ -134,152 +332,281 @@ export default function DeliveriesPage() {
                 <button
                   key={status}
                   onClick={() => setSelectedStatus(status)}
-                  className={`px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                  className={`px-3 py-1 rounded-sm text-[11px] font-bold uppercase transition-all tracking-wide shrink-0 ${
                     selectedStatus === status
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      ? 'bg-[#23496b] text-white border border-[#23496b]'
+                      : 'bg-slate-100 text-slate-600 border border-slate-200/60 hover:bg-slate-200'
                   }`}
                 >
-                  {status.charAt(0).toUpperCase() + status.slice(1).replace('-', ' ')}
+                  {statusConfig[status as keyof typeof statusConfig].label}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Deliveries Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* List View */}
-            <div className="lg:col-span-2 space-y-4">
-              {filteredDeliveries.length === 0 ? (
-                <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-                  <p className="text-gray-500">No deliveries found</p>
-                </div>
-              ) : (
-                filteredDeliveries.map((delivery) => {
-                  const config = statusConfig[delivery.status as keyof typeof statusConfig]
-                  const StatusIcon = config.icon
-                  return (
-                    <div
-                      key={delivery.id}
-                      onClick={() => setSelectedDelivery(delivery)}
-                      className={`bg-white rounded-lg border-2 p-4 cursor-pointer transition-all hover:shadow-md ${
-                        selectedDelivery?.id === delivery.id
-                          ? 'border-green-500 bg-green-50'
-                          : 'border-gray-200'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <h3 className="font-bold text-gray-900">{delivery.id}</h3>
-                          <p className="text-sm text-gray-500">Order {delivery.orderId}</p>
-                        </div>
-                        <span
-                          className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${config.bg} ${config.text}`}
-                        >
-                          {delivery.status.charAt(0).toUpperCase() +
-                            delivery.status.slice(1).replace('-', ' ')}
-                        </span>
-                      </div>
+          <div className="hidden md:block bg-white rounded-md border border-slate-200 shadow-xs overflow-hidden">
+            <Spin spinning={loading}>
+              <Table
+                columns={columns}
+                dataSource={filteredDeliveries}
+                rowKey="id"
+                size="middle"
+                pagination={{
+                  pageSize: 5,
+                  showSizeChanger: false,
+                  placement: ['bottomRight'] as any,
+                  className:
+                    'px-4 py-3 m-0 border-t border-slate-100 text-xs font-medium',
+                }}
+                locale={{ emptyText: 'No deliveries found.' }}
+              />
+            </Spin>
+          </div>
 
-                      <div className="space-y-2 mb-4">
-                        <div className="flex items-center gap-2 text-sm">
-                          <MapPin className="w-4 h-4 text-gray-400" />
-                          <p className="text-gray-700">{delivery.currentLocation}</p>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Package className="w-4 h-4 text-gray-400" />
-                          <p className="text-gray-700">{delivery.items}</p>
-                        </div>
-                      </div>
-
-                      {/* Progress Bar */}
-                      <div className="mb-4">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-xs font-semibold text-gray-600">
-                            Delivery Progress
-                          </span>
-                          <span className="text-xs font-bold text-gray-900">{delivery.progress}%</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-green-600 h-2 rounded-full transition-all"
-                            style={{ width: `${delivery.progress}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="text-xs text-gray-500">
-                        Updated {delivery.lastUpdate}
-                      </div>
-                    </div>
-                  )
-                })
-              )}
-            </div>
-
-            {/* Detail Panel */}
-            <div className="h-fit sticky top-24">
-              {selectedDelivery ? (
-                <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
-                  <div>
-                    <h2 className="text-lg font-bold text-gray-900 mb-2">{selectedDelivery.id}</h2>
-                    <p className="text-sm text-gray-500">Order {selectedDelivery.orderId}</p>
+          <div className="block md:hidden space-y-3">
+            {filteredDeliveries.map((delivery) => {
+              const config =
+                statusConfig[delivery.status as keyof typeof statusConfig] ||
+                statusConfig.pending
+              return (
+                <div
+                  key={delivery.id}
+                  className="bg-white border border-slate-200 rounded-md p-4 shadow-2xs space-y-3"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black text-slate-900 font-mono tracking-tight">
+                      {delivery.id}
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm bg-slate-50 border border-slate-200/80 text-slate-700 font-bold text-[10px] tracking-wide">
+                      <span className={`w-1 h-1 rounded-full ${config.dotColor}`} />
+                      {config.label}
+                    </span>
                   </div>
 
-                  <div>
-                    <p className="text-xs font-semibold text-gray-600 uppercase mb-3">Driver Info</p>
-                    <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-                      <div>
-                        <p className="text-xs text-gray-500">Name</p>
-                        <p className="font-semibold text-gray-900">{selectedDelivery.driver}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500">Vehicle</p>
-                        <p className="font-semibold text-gray-900">{selectedDelivery.vehicle}</p>
-                      </div>
-                      <a
-                        href={`tel:${selectedDelivery.phone}`}
-                        className="flex items-center gap-2 text-green-600 font-semibold hover:text-green-700 transition-colors text-sm"
-                      >
-                        <Phone className="w-4 h-4" />
-                        {selectedDelivery.phone}
-                      </a>
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-xs font-semibold text-gray-600 uppercase mb-3">
-                      Expected Delivery
+                  <div className="space-y-1">
+                    <p className="text-xs font-bold text-slate-800 line-clamp-1">
+                      {delivery.orderId}
                     </p>
-                    <div className="bg-blue-50 rounded-lg p-4 flex items-center gap-3">
-                      <Calendar className="w-5 h-5 text-blue-600" />
-                      <div>
-                        <p className="text-xs text-blue-600">Est. Delivery Date</p>
-                        <p className="font-bold text-blue-900">{selectedDelivery.estimatedDelivery}</p>
-                      </div>
-                    </div>
+                    <p className="text-[11px] text-slate-500 font-medium line-clamp-1">
+                      {delivery.vehicleNo} | {delivery.dispatcherName}
+                    </p>
                   </div>
 
-                  <div>
-                    <p className="text-xs font-semibold text-gray-600 uppercase mb-3">Items</p>
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="text-sm text-gray-700">{selectedDelivery.items}</p>
+                  <div className="flex items-center justify-between pt-2.5 border-t border-slate-100">
+                    <div>
+                      <span className="text-[9px] text-slate-400 font-bold uppercase block tracking-wider">
+                        Delivery Date
+                      </span>
+                      <span className="text-xs font-black text-slate-900">
+                        {delivery.deliveryDate}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        type="default"
+                        size="small"
+                        icon={<FileText className="w-3.5 h-3.5 text-slate-600" />}
+                        onClick={() => handleOpenDrawer(delivery)}
+                        className="inline-flex items-center justify-center w-7 h-7 bg-slate-50 border-slate-200"
+                        title="View details"
+                      />
+                      <Button
+                        type="default"
+                        size="small"
+                        loading={downloadingId === delivery.id}
+                        icon={<Download className="w-3.5 h-3.5 text-slate-600" />}
+                        onClick={() => downloadChallan(delivery.id)}
+                        className="inline-flex items-center justify-center w-7 h-7 bg-slate-50 border-slate-200"
+                        title="Download challan"
+                      />
                     </div>
                   </div>
-
-                  <button className="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors">
-                    Contact Driver
-                  </button>
                 </div>
-              ) : (
-                <div className="bg-white rounded-lg border border-gray-200 p-6 text-center text-gray-500">
-                  <p>Select a delivery to view details</p>
-                </div>
-              )}
-            </div>
+              )
+            })}
+            {filteredDeliveries.length === 0 && !loading && (
+              <div className="bg-white rounded-md border border-slate-200 p-8 text-center text-xs text-slate-400">
+                No deliveries found.
+              </div>
+            )}
           </div>
         </div>
       </main>
+
+      <Drawer
+        title={
+          <div className="flex items-center gap-2">
+            <span className="font-mono font-black text-slate-900 text-sm">
+              {selectedDelivery?.id}
+            </span>
+            {selectedDelivery && (
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-slate-100 border border-slate-200 text-slate-700 font-bold text-[10px] uppercase">
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    statusConfig[
+                      selectedDelivery.status as keyof typeof statusConfig
+                    ]?.dotColor
+                  }`}
+                />
+                {
+                  statusConfig[
+                    selectedDelivery.status as keyof typeof statusConfig
+                  ]?.label
+                }
+              </span>
+            )}
+          </div>
+        }
+        placement="right"
+        width={
+          typeof window !== 'undefined' && window.innerWidth < 640
+            ? '100%'
+            : 500
+        }
+        onClose={() => setIsDrawerOpen(false)}
+        open={isDrawerOpen}
+        styles={{ body: { padding: '16px sm:padding:20px' } }}
+        className="max-w-full"
+        extra={
+          selectedDelivery && (
+            <Button
+              size="small"
+              type="default"
+              icon={<Download className="w-3.5 h-3.5" />}
+              loading={downloadingId === selectedDelivery.id}
+              onClick={() => downloadChallan(selectedDelivery.id)}
+              className="text-xs font-bold rounded-sm hover:border-[#23496b]! hover:text-[#23496b]!"
+            >
+              Challan PDF
+            </Button>
+          )
+        }
+      >
+        {selectedDelivery && (
+          <div className="space-y-5 text-xs">
+            <div>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">
+                Delivery Info
+              </p>
+              <div className="bg-slate-50 border border-slate-200 rounded-sm p-3 space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-4">
+                  <div>
+                    <span className="text-slate-400 block font-medium">Order ID</span>
+                    <span className="font-bold text-slate-800">{selectedDelivery.orderId}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block font-medium">Receipt No</span>
+                    <span className="font-bold text-slate-700 font-mono">{selectedDelivery.receiptNumber}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block font-medium flex items-center gap-1">
+                      <Calendar className="w-3 h-3 text-slate-400 inline" /> Delivery Date
+                    </span>
+                    <span className="font-bold text-slate-700">{selectedDelivery.deliveryDate}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block font-medium flex items-center gap-1">
+                      <Truck className="w-3 h-3 text-slate-400 inline" /> Vehicle
+                    </span>
+                    <span className="font-bold text-slate-700">{selectedDelivery.vehicleNo}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">
+                Dispatcher & Transport
+              </p>
+              <div className="bg-slate-50 border border-slate-200 rounded-sm p-3 space-y-3">
+                <div>
+                  <span className="text-slate-400 block font-medium">Dispatcher</span>
+                  <span className="font-bold text-slate-800">{selectedDelivery.dispatcherName}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block font-medium">Transporter Info</span>
+                  <span className="font-bold text-slate-700">{selectedDelivery.transporterInfo}</span>
+                </div>
+                {selectedDelivery.note && (
+                  <div>
+                    <span className="text-slate-400 block font-medium">Note</span>
+                    <span className="text-slate-700">{selectedDelivery.note}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Package className="w-3.5 h-3.5" /> Delivered Items
+              </h3>
+              <div className="border border-slate-200 rounded-sm overflow-hidden bg-white overflow-x-auto">
+                <table className="w-full text-xs min-w-95">
+                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
+                    <tr>
+                      <th className="px-3 py-2 text-left">Product</th>
+                      <th className="px-3 py-2 text-center">Qty</th>
+                      <th className="px-3 py-2 text-right">Unit</th>
+                      <th className="px-3 py-2 text-right">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+                    {selectedDelivery.items.length > 0 ? (
+                      selectedDelivery.items.map((it, idx) => (
+                        <tr key={idx} className="hover:bg-slate-50/50">
+                          <td className="px-3 py-2.5">
+                            <p className="font-bold text-slate-900">{it.productName}</p>
+                            <span className="text-[9px] text-slate-400 font-bold font-mono">
+                              {it.variantName}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2.5 text-center font-bold text-slate-900">
+                            {it.deliveredQty}
+                          </td>
+                          <td className="px-3 py-2.5 text-right text-slate-400">
+                            TK {it.unitPrice.toLocaleString('en-IN')}
+                          </td>
+                          <td className="px-3 py-2.5 text-right font-bold text-slate-900">
+                            TK {it.totalWithVat.toLocaleString('en-IN')}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={4} className="px-3 py-4 text-center text-slate-400">
+                          No delivery items found.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {selectedDelivery.items.length > 0 && (
+              <div className="bg-slate-50 border border-slate-200 rounded-sm p-3.5">
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-slate-500 font-medium">
+                    <span>Subtotal:</span>
+                    <span className="text-slate-900 font-bold">
+                      TK {selectedDelivery.items.reduce((s, it) => s + it.subTotal, 0).toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                  <Divider dashed className="my-2" />
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs font-bold text-slate-900 uppercase tracking-wide">
+                      Total with VAT:
+                    </span>
+                    <span className="text-sm font-black text-[#23496b]">
+                      TK {selectedDelivery.items.reduce((s, it) => s + it.totalWithVat, 0).toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </Drawer>
     </div>
   )
 }

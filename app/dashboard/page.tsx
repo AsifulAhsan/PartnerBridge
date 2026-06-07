@@ -145,7 +145,7 @@ export default function Dashboard() {
       dataIndex: 'total',
       key: 'total',
       align: 'right' as const,
-      render: (val: number) => <span className="font-bold text-slate-900">৳ {val.toLocaleString('en-IN')}</span>,
+      render: (val: number) => <span className="font-bold text-slate-900">TK {val.toLocaleString('en-IN')}</span>,
     },
   ]
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -202,7 +202,7 @@ export default function Dashboard() {
                   <p className="text-xs font-semibold text-slate-600 mb-1">Gross Invoiced Value</p>
                   <Statistic
                     value={2845000}
-                    prefix="৳ "
+                    prefix="TK "
                     styles={{ content: { fontSize: '22px', fontWeight: 800, color: '#1F3A60' } }}
                   />
                   <p className="text-[10px] text-slate-400 mt-1 font-medium">Net Realized Collection</p>
@@ -221,10 +221,10 @@ export default function Dashboard() {
                   <p className="text-xs font-semibold text-slate-600 mb-1">Available Credit Line</p>
                   <Statistic
                     value={6500000}
-                    prefix="৳ "
+                    prefix="TK "
                     styles={{ content: { fontSize: '22px', fontWeight: 800, color: '#1F3A60' } }}
                   />
-                  <p className="text-[10px] text-slate-400 mt-1 font-medium">Cap Limit: ৳ 10M</p>
+                  <p className="text-[10px] text-slate-400 mt-1 font-medium">Cap Limit: TK 10M</p>
                 </div>
               </Card>
             </Col>
