@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Eye, EyeOff, LogIn, HelpCircle } from 'lucide-react'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -12,7 +12,7 @@ export default function LoginPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    
+
     setTimeout(() => {
       window.location.href = '/dashboard'
       setIsLoading(false)
@@ -43,17 +43,17 @@ export default function LoginPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email Input Node */}
+            {/* Phone Input Node */}
             <div>
-              <label htmlFor="email" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Email Address
+              <label htmlFor="phone" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Phone Number
               </label>
               <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="email@example.com"
+                id="phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="01734520260"
                 className="w-full h-10 px-3 py-2 border border-slate-300 rounded-sm focus:ring-1 focus:ring-[#23496b] focus:border-[#23496b] outline-none text-xs text-slate-900 font-medium transition-all"
                 required
               />
