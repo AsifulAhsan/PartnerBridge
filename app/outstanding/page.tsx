@@ -10,7 +10,7 @@ const outstandingData = [
   {
     invoice: 'INV-2024-0854',
     customer: 'Premium Livestock',
-    amount: '$179.97',
+    amount: '৳179.97',
     daysOverdue: 2,
     dueDate: '2024-06-19',
     lastReminder: '2024-06-05',
@@ -19,7 +19,7 @@ const outstandingData = [
   {
     invoice: 'INV-2024-0853',
     customer: 'Green Pastures',
-    amount: '$239.92',
+    amount: '৳239.92',
     daysOverdue: 0,
     dueDate: '2024-06-18',
     lastReminder: 'Not sent',
@@ -28,7 +28,7 @@ const outstandingData = [
   {
     invoice: 'INV-2024-0855',
     customer: 'Riverside Hatchery',
-    amount: '$320.00',
+    amount: '৳320.00',
     daysOverdue: 0,
     dueDate: '2024-06-19',
     lastReminder: 'Not sent',
@@ -46,7 +46,7 @@ export default function OutstandingPage() {
   )
 
   const totalOutstanding = outstandingData
-    .reduce((sum, item) => sum + parseFloat(item.amount.replace('$', '')), 0)
+    .reduce((sum, item) => sum + parseFloat(item.amount.replace('৳', '')), 0)
     .toFixed(2)
 
   const overdueCount = outstandingData.filter((item) => item.daysOverdue > 0).length
@@ -66,7 +66,7 @@ export default function OutstandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <KPICard
               title="Total Outstanding"
-              value={`$${totalOutstanding}`}
+              value={`৳${totalOutstanding}`}
               unit="invoices due"
               icon={<AlertTriangle />}
               color="orange"

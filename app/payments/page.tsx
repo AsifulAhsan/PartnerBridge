@@ -10,7 +10,7 @@ const payments = [
   {
     id: 'PAY-2024-0245',
     invoice: 'INV-2024-0856',
-    amount: '$449.95',
+    amount: '৳449.95',
     method: 'Bank Transfer',
     date: '2024-06-06',
     status: 'completed',
@@ -19,7 +19,7 @@ const payments = [
   {
     id: 'PAY-2024-0244',
     invoice: 'INV-2024-0852',
-    amount: '$287.50',
+    amount: '৳287.50',
     method: 'Credit Card',
     date: '2024-06-04',
     status: 'completed',
@@ -28,7 +28,7 @@ const payments = [
   {
     id: 'PAY-2024-0243',
     invoice: 'INV-2024-0851',
-    amount: '$507.50',
+    amount: '৳507.50',
     method: 'Bank Transfer',
     date: '2024-06-02',
     status: 'completed',
@@ -37,7 +37,7 @@ const payments = [
   {
     id: 'PAY-2024-0242',
     invoice: 'INV-2024-0855',
-    amount: '$320.00',
+    amount: '৳320.00',
     method: 'Credit Card',
     date: '2024-06-05',
     status: 'pending',
@@ -46,7 +46,7 @@ const payments = [
   {
     id: 'PAY-2024-0241',
     invoice: 'INV-2024-0854',
-    amount: '$179.97',
+    amount: '৳179.97',
     method: 'Bank Transfer',
     date: '2024-06-05',
     status: 'overdue',
@@ -75,12 +75,12 @@ export default function PaymentsPage() {
 
   const totalPending = payments
     .filter((p) => p.status === 'pending' || p.status === 'overdue')
-    .reduce((sum, p) => sum + parseFloat(p.amount.replace('$', '')), 0)
+    .reduce((sum, p) => sum + parseFloat(p.amount.replace('৳', '')), 0)
     .toFixed(2)
 
   const totalCompleted = payments
     .filter((p) => p.status === 'completed')
-    .reduce((sum, p) => sum + parseFloat(p.amount.replace('$', '')), 0)
+    .reduce((sum, p) => sum + parseFloat(p.amount.replace('৳', '')), 0)
     .toFixed(2)
 
   return (
@@ -104,14 +104,14 @@ export default function PaymentsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <KPICard
               title="Total Completed"
-              value={`$${totalCompleted}`}
+              value={`৳${totalCompleted}`}
               unit="this month"
               icon={<CheckCircle />}
               color="green"
             />
             <KPICard
               title="Pending Payments"
-              value={`$${totalPending}`}
+              value={`৳${totalPending}`}
               unit="awaiting payment"
               icon={<Clock />}
               color="orange"
