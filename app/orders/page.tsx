@@ -477,7 +477,7 @@ export default function OrdersPage() {
           </div>
         }
         placement="right"
-        width={
+        size={
           typeof window !== 'undefined' && window.innerWidth < 640
             ? '100%'
             : 500
