@@ -25,6 +25,7 @@ import {
   message,
   Tag,
   Divider,
+  Descriptions,
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import axios from 'axios'
@@ -58,7 +59,7 @@ interface DeliveryDataType {
 
 const statusConfig: Record<string, { dotColor: string; label: string; bg: string; text: string }> = {
   PLN: { dotColor: 'bg-amber-500', label: 'Planned', bg: 'bg-amber-100', text: 'text-amber-800' },
-  DSP: { dotColor: 'bg-blue-500', label: 'Dispatched', bg: 'bg-blue-100', text: 'text-blue-800' },
+  DSP: { dotColor: 'bg-blue-500', label: 'Dispatched', bg: 'bg-blue-100', text: 'text-brand-secondary' },
   DLV: { dotColor: 'bg-emerald-500', label: 'Delivered', bg: 'bg-emerald-100', text: 'text-emerald-800' },
 }
 
@@ -97,7 +98,7 @@ export default function DeliveriesPage() {
   const fetchDeliveries = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await axios.get(`${API_BASE}/deliveries`, {
+      const res = await axios.get(`${API_BASE}/deliveries?fromDate=100000`, {
         headers: { Authorization: `Bearer ${ACCESS_TOKEN}` },
       })
       const data = Array.isArray(res.data) ? res.data : res.data?.data ?? []
@@ -114,13 +115,13 @@ export default function DeliveriesPage() {
         note: d.note || '',
         items: Array.isArray(d.items)
           ? d.items.map((it: any) => ({
-              productName: it.productName || 'Product',
-              variantName: it.variantName || '',
-              deliveredQty: it.deliveredQty ?? 0,
-              unitPrice: it.unitPrice ?? 0,
-              subTotal: it.subTotal ?? 0,
-              totalWithVat: it.totalWithVat ?? 0,
-            }))
+            productName: it.productName || 'Product',
+            variantName: it.variantName || '',
+            deliveredQty: it.deliveredQty ?? 0,
+            unitPrice: it.unitPrice ?? 0,
+            subTotal: it.subTotal ?? 0,
+            totalWithVat: it.totalWithVat ?? 0,
+          }))
           : [],
         rawDate: d.deliveryDate || 0,
       }))
@@ -192,7 +193,7 @@ export default function DeliveriesPage() {
       key: 'id',
       width: 140,
       align: 'left',
-      className: 'text-xs font-bold text-slate-900 font-mono tracking-tight pl-4',
+      className: 'text-sm font-bold text-slate-900 font-mono tracking-tight pl-4',
     },
     {
       title: 'Order ID',
@@ -200,7 +201,7 @@ export default function DeliveriesPage() {
       key: 'orderId',
       width: 130,
       align: 'left',
-      className: 'text-xs font-semibold text-slate-800',
+      className: 'text-sm font-semibold text-slate-800',
     },
     {
       title: 'Delivery Date',
@@ -208,7 +209,7 @@ export default function DeliveriesPage() {
       key: 'deliveryDate',
       width: 120,
       align: 'left',
-      className: 'text-xs text-slate-500 font-medium',
+      className: 'text-sm text-slate-500 font-medium',
     },
     {
       title: 'Vehicle',
@@ -216,7 +217,7 @@ export default function DeliveriesPage() {
       key: 'vehicleNo',
       width: 110,
       align: 'left',
-      className: 'text-xs text-slate-500 font-medium',
+      className: 'text-sm text-slate-500 font-medium',
     },
     {
       title: 'Dispatcher',
@@ -224,7 +225,7 @@ export default function DeliveriesPage() {
       key: 'dispatcherName',
       align: 'left',
       ellipsis: true,
-      className: 'text-xs text-slate-500 font-medium',
+      className: 'text-sm text-slate-500 font-medium',
     },
     {
       title: 'Status',
@@ -237,7 +238,7 @@ export default function DeliveriesPage() {
           statusConfig[status as keyof typeof statusConfig] ||
           statusConfig.pending
         return (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200/80 text-slate-700 font-semibold text-[11px] tracking-wide">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200/80 text-slate-700 font-semibold text-sm tracking-wide">
             <span className={`w-1.5 h-1.5 rounded-full ${config.dotColor}`} />
             {config.label}
           </span>
@@ -255,7 +256,7 @@ export default function DeliveriesPage() {
             type="default"
             icon={<FileText className="w-3.5 h-3.5 text-slate-500" />}
             onClick={() => handleOpenDrawer(record)}
-            className="inline-flex items-center justify-center rounded-sm w-7 h-7 bg-white shadow-xs hover:border-slate-300"
+            className="inline-flex items-center justify-center rounded-sm w-8 h-8 bg-white shadow-xs hover:border-slate-300"
             title="View details"
           />
           <Button
@@ -263,7 +264,7 @@ export default function DeliveriesPage() {
             icon={<Download className="w-3.5 h-3.5 text-slate-500" />}
             loading={downloadingId === record.id}
             onClick={() => downloadChallan(record.id)}
-            className="inline-flex items-center justify-center rounded-sm w-7 h-7 bg-white shadow-xs hover:border-slate-300"
+            className="inline-flex items-center justify-center rounded-sm w-8 h-8 bg-white shadow-xs hover:border-slate-300"
             title="Download challan"
           />
         </div>
@@ -272,11 +273,11 @@ export default function DeliveriesPage() {
   ]
 
   return (
-    <div className="flex h-screen bg-[#EAEFF4]">
+    <div className="flex h-screen bg-background">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <main className="flex-1 overflow-auto md:ml-0 flex flex-col w-full">
-        <div className="bg-[#23496b] text-white shrink-0">
+        <div className="bg-brand-secondary text-white shrink-0">
           <Header
             title="Delivery Tracking"
             subtitle="Real-time tracking of your shipments"
@@ -285,12 +286,12 @@ export default function DeliveriesPage() {
         </div>
 
         <div className="bg-white border-b border-slate-200 px-4 sm:px-6 py-2.5 flex items-center gap-2 text-xs text-slate-500 font-medium shrink-0 overflow-x-auto whitespace-nowrap scrollbar-none">
-          <Home className="w-3.5 h-3.5 text-blue-800 shrink-0" />
-          <span className="text-blue-800 font-semibold hover:underline cursor-pointer">
+          <Home className="w-3.5 h-3.5 text-brand-secondary shrink-0" />
+          <span className="text-brand-secondary font-semibold hover:underline cursor-pointer">
             Home
           </span>
           <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
-          <span className="text-blue-800 font-semibold hover:underline cursor-pointer">
+          <span className="text-brand-secondary font-semibold hover:underline cursor-pointer">
             Operations
           </span>
           <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
@@ -320,11 +321,10 @@ export default function DeliveriesPage() {
               </span>
               <button
                 onClick={() => setSelectedStatus(null)}
-                className={`px-3 py-1 rounded-sm text-[11px] font-bold transition-all uppercase tracking-wide shrink-0 ${
-                  !selectedStatus
-                    ? 'bg-[#23496b] text-white border border-[#23496b]'
+                className={`px-3 py-1 rounded-sm text-[11px] font-bold transition-all uppercase tracking-wide shrink-0 ${!selectedStatus
+                    ? 'bg-brand-secondary text-white border border-[#23496b]'
                     : 'bg-slate-100 text-slate-600 border border-slate-200/60 hover:bg-slate-200'
-                }`}
+                  }`}
               >
                 All Shipments
               </button>
@@ -332,11 +332,10 @@ export default function DeliveriesPage() {
                 <button
                   key={status}
                   onClick={() => setSelectedStatus(status)}
-                  className={`px-3 py-1 rounded-sm text-[11px] font-bold uppercase transition-all tracking-wide shrink-0 ${
-                    selectedStatus === status
-                      ? 'bg-[#23496b] text-white border border-[#23496b]'
+                  className={`px-3 py-1 rounded-sm text-[11px] font-bold uppercase transition-all tracking-wide shrink-0 ${selectedStatus === status
+                      ? 'bg-brand-secondary text-white border border-[#23496b]'
                       : 'bg-slate-100 text-slate-600 border border-slate-200/60 hover:bg-slate-200'
-                  }`}
+                    }`}
                 >
                   {statusConfig[status as keyof typeof statusConfig].label}
                 </button>
@@ -442,11 +441,10 @@ export default function DeliveriesPage() {
             {selectedDelivery && (
               <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-slate-100 border border-slate-200 text-slate-700 font-bold text-[10px] uppercase">
                 <span
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    statusConfig[
+                  className={`w-1.5 h-1.5 rounded-full ${statusConfig[
                       selectedDelivery.status as keyof typeof statusConfig
                     ]?.dotColor
-                  }`}
+                    }`}
                 />
                 {
                   statusConfig[
@@ -461,7 +459,7 @@ export default function DeliveriesPage() {
         width={
           typeof window !== 'undefined' && window.innerWidth < 640
             ? '100%'
-            : 500
+            : 720
         }
         onClose={() => setIsDrawerOpen(false)}
         open={isDrawerOpen}
@@ -484,57 +482,50 @@ export default function DeliveriesPage() {
       >
         {selectedDelivery && (
           <div className="space-y-5 text-xs">
-            <div>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">
-                Delivery Info
-              </p>
-              <div className="bg-slate-50 border border-slate-200 rounded-sm p-3 space-y-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-4">
-                  <div>
-                    <span className="text-slate-400 block font-medium">Order ID</span>
-                    <span className="font-bold text-slate-800">{selectedDelivery.orderId}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block font-medium">Receipt No</span>
-                    <span className="font-bold text-slate-700 font-mono">{selectedDelivery.receiptNumber}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block font-medium flex items-center gap-1">
-                      <Calendar className="w-3 h-3 text-slate-400 inline" /> Delivery Date
-                    </span>
-                    <span className="font-bold text-slate-700">{selectedDelivery.deliveryDate}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block font-medium flex items-center gap-1">
-                      <Truck className="w-3 h-3 text-slate-400 inline" /> Vehicle
-                    </span>
-                    <span className="font-bold text-slate-700">{selectedDelivery.vehicleNo}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <Descriptions
+              title="Delivery Info"
+              bordered
+              size="small"
+              column={1}
+              layout="horizontal"
+              labelStyle={{ fontWeight: 600, color: '#64748B', width: '40%', fontSize: '14px' }}
+              contentStyle={{ fontWeight: 700, color: '#1E293B', fontSize: '14px' }}
+            >
+              <Descriptions.Item label="Order ID">
+                {selectedDelivery.orderId}
+              </Descriptions.Item>
+              <Descriptions.Item label="Receipt No">
+                {selectedDelivery.receiptNumber}
+              </Descriptions.Item>
+              <Descriptions.Item label="Delivery Date">
+                {selectedDelivery.deliveryDate}
+              </Descriptions.Item>
+              <Descriptions.Item label="Vehicle">
+                {selectedDelivery.vehicleNo}
+              </Descriptions.Item>
+            </Descriptions>
 
-            <div>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">
-                Dispatcher & Transport
-              </p>
-              <div className="bg-slate-50 border border-slate-200 rounded-sm p-3 space-y-3">
-                <div>
-                  <span className="text-slate-400 block font-medium">Dispatcher</span>
-                  <span className="font-bold text-slate-800">{selectedDelivery.dispatcherName}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block font-medium">Transporter Info</span>
-                  <span className="font-bold text-slate-700">{selectedDelivery.transporterInfo}</span>
-                </div>
-                {selectedDelivery.note && (
-                  <div>
-                    <span className="text-slate-400 block font-medium">Note</span>
-                    <span className="text-slate-700">{selectedDelivery.note}</span>
-                  </div>
-                )}
-              </div>
-            </div>
+            <Descriptions
+              title="Dispatcher & Transport"
+              bordered
+              size="small"
+              column={1}
+              layout="horizontal"
+              labelStyle={{ fontWeight: 600, color: '#64748B', width: '40%', fontSize: '14px' }}
+              contentStyle={{ fontWeight: 700, color: '#1E293B', fontSize: '14px' }}
+            >
+              <Descriptions.Item label="Dispatcher">
+                {selectedDelivery.dispatcherName}
+              </Descriptions.Item>
+              <Descriptions.Item label="Transporter Info">
+                {selectedDelivery.transporterInfo}
+              </Descriptions.Item>
+              {selectedDelivery.note && (
+                <Descriptions.Item label="Note">
+                  {selectedDelivery.note}
+                </Descriptions.Item>
+              )}
+            </Descriptions>
 
             <div className="space-y-2">
               <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -594,10 +585,10 @@ export default function DeliveriesPage() {
                   </div>
                   <Divider dashed className="my-2" />
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-slate-900 uppercase tracking-wide">
+                    <span style={{ fontSize: '14px', fontWeight: 700, color: '#1E293B' }}>
                       Total with VAT:
                     </span>
-                    <span className="text-sm font-black text-[#23496b]">
+                    <span style={{ fontSize: '18px', fontWeight: 900, color: '#23496b' }}>
                       TK {selectedDelivery.items.reduce((s, it) => s + it.totalWithVat, 0).toLocaleString('en-IN')}
                     </span>
                   </div>

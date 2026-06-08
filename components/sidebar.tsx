@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import {
   BarChart3,
@@ -46,12 +47,17 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           <div className="p-4">
             <div className="px-2 mb-5 pb-4 border-b border-slate-100 flex items-center justify-between gap-2.5">
               <div className="flex items-center gap-2.5">
-                <div className="w-6 h-6 bg-[#1F3A60] text-white rounded-sm font-black text-xs flex items-center justify-center shadow-inner shrink-0">
-                  S
+                <div className="w-7 h-7 bg-white rounded-sm flex items-center justify-center shadow-sm border border-slate-200 overflow-hidden shrink-0">
+                  <Image src="/logo.png" alt="SaleSense" width={24} height={24} className="object-contain" />
                 </div>
-                <span className="text-sm font-black tracking-wider text-slate-800">
-                  Sale Sense
-                </span>
+                <div className="flex flex-col leading-none">
+                  <span className="text-base font-black tracking-wider text-slate-800">
+                    SaleSense
+                  </span>
+                  <span className="text-xs font-bold text-brand tracking-wider uppercase">
+                    SFA PartnerBridge
+                  </span>
+                </div>
               </div>
               
               {onClose && (
@@ -74,13 +80,13 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                     key={item.href}
                     href={item.href}
                     onClick={() => onClose?.()}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-sm transition-all text-xs font-semibold tracking-wide ${
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-sm transition-all text-sm font-semibold tracking-wide ${
                       isActive
-                        ? 'bg-[#EAEFF4] text-[#1F3A60] font-bold border border-slate-300/60 shadow-xs'
+                        ? 'bg-slate-100 text-brandSecondary font-bold border border-slate-300/60 shadow-xs'
                         : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                     }`}
                   >
-                    <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#1F3A60]' : 'text-slate-400'}`} />
+                    <Icon className={`w-[18px] h-[18px] shrink-0 ${isActive ? 'text-brandSecondary' : 'text-slate-400'}`} />
                     <span>{item.label}</span>
                   </Link>
                 )
@@ -89,8 +95,8 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           </div>
 
           <div className="p-4 border-t border-slate-100 bg-slate-50">
-            <button className="flex items-center gap-3 w-full px-3 py-2 text-xs font-semibold text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-sm transition-all hover:cursor-pointer">
-              <LogOut className="w-4 h-4 text-slate-400" />
+            <button className="flex items-center gap-3 w-full px-3 py-2 text-sm font-semibold text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-sm transition-all hover:cursor-pointer">
+              <LogOut className="w-[18px] h-[18px] text-slate-400" />
               <span>Sign Out Session</span>
             </button>
           </div>

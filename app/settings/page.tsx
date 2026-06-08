@@ -43,11 +43,13 @@ export default function SettingsPage() {
   ]
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-background">
       <Sidebar />
 
       <main className="flex-1 overflow-auto md:ml-0">
-        <Header title="Settings" subtitle="Manage your account and preferences" />
+        <div className="bg-brand-secondary text-white shrink-0">
+          <Header title="Settings" subtitle="Manage your account and preferences" />
+        </div>
 
         <div className="p-6 md:p-8">
           <div className="max-w-4xl">

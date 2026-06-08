@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { Bell, ChevronDown, Menu } from 'lucide-react'
 import { useState } from 'react'
 import { Select } from 'antd'
@@ -15,7 +16,7 @@ export function Header({ title, subtitle, actions, onMenuToggle }: HeaderProps) 
   const [showProfile, setShowProfile] = useState(false)
 
   return (
-    <header className="bg-[#23496b] text-white border-b border-blue-900/40 sticky top-0 z-20 shadow-sm">
+    <header className="bg-brand-secondary text-white border-b border-blue-900/40 sticky top-0 z-20 shadow-sm">
       <div className="px-4 sm:px-6 py-3.5">
         <div className="flex items-center justify-between gap-4">
 
@@ -28,14 +29,22 @@ export function Header({ title, subtitle, actions, onMenuToggle }: HeaderProps) 
               <Menu className="w-5 h-5" />
             </button>
 
-            <div className="hidden lg:block shrink-0">
-              <span className="font-bruno-ace text-base font-black tracking-wider text-white">
-                PartnerBridge
-              </span>
+            <div className="hidden lg:flex items-center gap-2.5 shrink-0">
+              <div className="w-7 h-7 bg-white rounded-md flex items-center justify-center shadow-sm overflow-hidden shrink-0">
+                <Image src="/logo.png" alt="SaleSense" width={24} height={24} className="object-contain" />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-bruno-ace text-base font-black tracking-wider text-white">
+                  SaleSense SFA
+                </span>
+                <span className="text-sm font-bold text-white tracking-wider uppercase border-l border-blue-400/30 pl-2">
+                  Partner Bridge
+                </span>
+              </div>
             </div>
-            <div className="flex flex-col">
-              <h1 className="block lg:hidden text-sm font-bold tracking-tight line-clamp-1">
-                PartnerBridge
+            <div className="flex flex-col lg:hidden">
+              <h1 className="text-sm font-bold tracking-tight line-clamp-1">
+                SaleSense SFA
               </h1>
             </div>
           </div>
