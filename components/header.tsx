@@ -34,16 +34,13 @@ export function Header({ title, subtitle, actions, onMenuToggle }: HeaderProps) 
                 <Image src="/logo.png" alt="SaleSense" width={24} height={24} className="object-contain" />
               </div> */}
               <div className="flex items-center gap-2">
-                <span className="font-bruno-ace lg:hidden text-base font-black tracking-wider text-white">
-                  SaleSense SFA
-                </span>
-                <span className="text-md font-bold text-white tracking-wider pl-2">
+                <span className="text-lg font-bold text-white tracking-wider pl-2">
                   Partner Bridge
                 </span>
               </div>
             </div>
             <div className="flex flex-col lg:hidden">
-              <h1 className="text-sm font-bold tracking-tight line-clamp-1">
+              <h1 className="text-md md:text-lg font-bold tracking-tight line-clamp-1">
                 SaleSense SFA
               </h1>
             </div>

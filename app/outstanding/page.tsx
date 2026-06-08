@@ -3,8 +3,9 @@
 import { Sidebar } from '@/components/sidebar'
 import { Header } from '@/components/header'
 import { KPICard } from '@/components/kpi-card'
-import { Search, AlertTriangle, TrendingUp } from 'lucide-react'
+import { Search, AlertTriangle, TrendingUp, Layers } from 'lucide-react'
 import { useState } from 'react'
+import { Card, ConfigProvider, Statistic } from 'antd'
 
 const outstandingData = [
   {
@@ -63,31 +64,79 @@ export default function OutstandingPage() {
           />
         </div>
 
-        <div className="p-6 md:p-8 space-y-8">
+        <div className="p-6 md:p-8 space-y-3">
           {/* KPI Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <KPICard
-              title="Total Outstanding"
-              value={`৳${totalOutstanding}`}
-              unit="invoices due"
-              icon={<AlertTriangle />}
-              color='blue'
-            />
-            <KPICard
-              title="Overdue"
-              value={overdueCount}
-              unit="invoices"
-              icon={<TrendingUp />}
-              color="blue"
-            />
-            <KPICard
-              title="Invoices"
-              value={outstandingData.length}
-              unit="total"
-              icon={<AlertTriangle />}
-              color="blue"
-            />
-          </div>
+          <ConfigProvider
+            theme={{
+              components: {
+                Card: {
+                  paddingLG: 20, // Clean, condensed padding tracking grid
+                },
+                Statistic: {
+                  titleFontSize: 12,
+                  contentFontSize: 24,
+                },
+              },
+            }}
+          >
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+              {/* Card 1: Total Outstanding */}
+              <Card
+                variant='borderless'
+                className="px-2! py-4! shadow-none! border border-gray-200 rounded-sm! bg-white!"
+              >
+                <div className="flex justify-between items-start">
+                  <Statistic
+                    title={<span className="text-black font-normal tracking-wide uppercase text-lg">Total Outstanding</span>}
+                    value={parseFloat(totalOutstanding)}
+                    precision={2}
+                    prefix={<span className="font-bold text-slate-800 mr-0.5">৳</span>}
+                    suffix={<span className="text-sm text-black font-normal ml-2">invoices due</span>}
+                    valueStyle={{ color: '#000000', fontWeight: 500 }}
+                  />
+                  <div className="p-2 rounded-sm bg-slate-50 border border-slate-200 text-slate-500 shadow-2xs">
+                    <AlertTriangle className="w-4 h-4" />
+                  </div>
+                </div>
+              </Card>
+
+              {/* Card 2: Overdue Invoices */}
+              <Card
+                variant='borderless'
+                className="px-2! py-4! shadow-none! border border-gray-200 rounded-sm! bg-white!"
+              >
+                <div className="flex justify-between items-start">
+                  <Statistic
+                    title={<span className="text-black font-normal tracking-wide uppercase text-lg">Overdue Accounts</span>}
+                    value={overdueCount}
+                    suffix={<span className="text-sm text-black font-normal ml-2">invoices</span>}
+                    valueStyle={{ color: '#000000', fontWeight: 500 }}
+                  />
+                  <div className="p-2 rounded-sm bg-slate-50 border border-slate-200 text-slate-500 shadow-2xs">
+                    <TrendingUp className="w-4 h-4" />
+                  </div>
+                </div>
+              </Card>
+
+              {/* Card 3: Total Logged Ledger Invoices */}
+              <Card
+                variant='borderless'
+                className="px-2! py-4! shadow-none! border border-gray-200 rounded-sm! bg-white!"
+              >
+                <div className="flex justify-between items-start">
+                  <Statistic
+                    title={<span className="text-black font-normal tracking-wide uppercase text-lg">Total Invoices</span>}
+                    value={outstandingData.length}
+                    suffix={<span className="text-sm text-black font-normal ml-2">total items</span>}
+                    valueStyle={{ color: '#000000', fontWeight: 500 }}
+                  />
+                  <div className="p-2 rounded-sm bg-slate-50 border border-slate-200 text-slate-500 shadow-2xs">
+                    <Layers className="w-4 h-4" />
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </ConfigProvider>
 
           {/* Search */}
           <div className="bg-white rounded-lg border border-gray-200 p-4">
@@ -109,25 +158,25 @@ export default function OutstandingPage() {
               <table className="w-full">
                 <thead className="border-b border-gray-200 bg-[#0191da]">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-white">
+                    <th className="px-6 py-4 text-left text-md font-semibold text-white">
                       Invoice ID
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-white">
+                    <th className="px-6 py-4 text-left text-md font-semibold text-white">
                       Customer
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-white">
+                    <th className="px-6 py-4 text-left text-md font-semibold text-white">
                       Due Date
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-white">
+                    <th className="px-6 py-4 text-left text-md font-semibold text-white">
                       Status
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-white">
+                    <th className="px-6 py-4 text-left text-md font-semibold text-white">
                       Days
                     </th>
-                    <th className="px-6 py-4 text-right text-xs font-semibold text-white">
+                    <th className="px-6 py-4 text-right text-md font-semibold text-white">
                       Amount
                     </th>
-                    <th className="px-6 py-4 text-center text-xs font-semibold text-white">
+                    <th className="px-6 py-4 text-center text-md font-semibold text-white">
                       Action
                     </th>
                   </tr>
@@ -136,39 +185,37 @@ export default function OutstandingPage() {
                   {filteredData.map((item) => (
                     <tr key={item.invoice} className="hover:bg-background transition-colors">
                       <td className="px-6 py-4">
-                        <span className="font-semibold text-gray-900">{item.invoice}</span>
+                        <span className="font-normal text-black text-sm">{item.invoice}</span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-black">{item.customer}</span>
+                        <span className="font-normal text-black text-sm">{item.customer}</span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-gray-600 text-sm">{item.dueDate}</span>
+                        <span className="font-normal text-black text-sm">{item.dueDate}</span>
                       </td>
                       <td className="px-6 py-4">
                         <span
-                          className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                            item.status === 'overdue'
-                              ? 'bg-red-100 text-red-800'
-                              : 'bg-orange-100 text-orange-800'
-                          }`}
+                          className={`inline-block px-3 py-1 rounded-full text-md font-semibold ${item.status === 'overdue'
+                            ? 'bg-red-100 text-red-800 text-sm'
+                            : 'bg-orange-100 text-orange-800 text-sm'
+                            }`}
                         >
                           {item.status === 'overdue' ? 'Overdue' : 'Due Soon'}
                         </span>
                       </td>
                       <td className="px-6 py-4">
                         <span
-                          className={`text-sm font-semibold ${
-                            item.daysOverdue > 0 ? 'text-red-600' : 'text-orange-600'
-                          }`}
+                          className={`text-sm font-semibold ${item.daysOverdue > 0 ? 'text-gray-600 ' : 'text-gray-600'
+                            }`}
                         >
                           {item.daysOverdue > 0 ? `${item.daysOverdue} days` : 'Due soon'}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <span className="font-bold text-gray-900">{item.amount}</span>
+                        <span className="font-sm text-gray-900 text-sm">{item.amount}</span>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <button className="inline-flex items-center justify-center px-3 py-1 text-sm font-semibold text-white bg-[#0191da] rounded-lg hover:bg-green-700 transition-colors">
+                        <button className="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-[#1466b8] bg-white rounded-sm hover:bg-gray-200 border border-[#1466b8] transition-colors">
                           Send Reminder
                         </button>
                       </td>

@@ -296,7 +296,7 @@ export default function QuickOrderPage() {
                 <button
                   onClick={() => setSelectedCategory(null)}
                   className={`px-3 py-1 rounded-sm text-xs font-bold transition-all shrink-0 ${!selectedCategory
-                      ? 'bg-brand-secondary text-white border border-[#23496b]'
+                      ? 'bg-[#1466b8] text-white border-0'
                       : 'bg-slate-100 text-slate-600 border border-slate-200/60 hover:bg-slate-200'
                     }`}
                 >
@@ -307,7 +307,7 @@ export default function QuickOrderPage() {
                     key={category}
                     onClick={() => setSelectedCategory(category)}
                     className={`px-3 py-1 rounded-sm text-xs font-bold transition-all shrink-0 ${selectedCategory === category
-                        ? 'bg-brand-secondary text-white border border-[#23496b]'
+                        ? 'bg-[#1466b8] text-white border-0'
                         : 'bg-slate-100 text-slate-600 border border-slate-200/60 hover:bg-slate-200'
                       }`}
                   >

@@ -8,11 +8,11 @@ import { useState } from 'react'
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('profile')
   const [formData, setFormData] = useState({
-    companyName: 'Springfield Farm',
-    contactName: 'John Doe',
-    email: 'john@springfieldfarm.com',
-    phone: '+1 (555) 123-4567',
-    address: '123 Farm Lane, Springfield, IL 62701',
+    companyName: 'M/S A.R Agro & Hatchery Complex',
+    contactName: 'Md. Anisur Rahman',
+    email: 'anisur.rahman@springfieldagro.com',
+    phone: '+880 1712-345678',
+    address: 'Chowrasta Bazar, Natore Sadar, Natore - 6400',
   })
 
   const [notificationSettings, setNotificationSettings] = useState({
@@ -28,7 +28,7 @@ export default function SettingsPage() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleNotificationChange = (key: string) => {
+  const handleNotificationChange = (key: keyof typeof notificationSettings) => {
     setNotificationSettings((prev) => ({
       ...prev,
       [key]: !prev[key],
@@ -61,11 +61,10 @@ export default function SettingsPage() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2 px-4 py-3 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
-                      activeTab === tab.id
-                        ? 'border-[#1466b8] text-[#1466b8]'
-                        : 'border-transparent text-gray-600 hover:text-gray-900'
-                    }`}
+                    className={`flex items-center gap-2 px-4 py-3 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id
+                      ? 'border-[#1466b8] text-[#1466b8]'
+                      : 'border-transparent text-gray-600 hover:text-gray-900'
+                      }`}
                   >
                     <Icon className="w-4 h-4" />
                     {tab.label}
@@ -90,7 +89,7 @@ export default function SettingsPage() {
                         name="companyName"
                         value={formData.companyName}
                         onChange={handleChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1466b8] focus:border-transparent outline-none"
                       />
                     </div>
 
@@ -103,7 +102,7 @@ export default function SettingsPage() {
                         name="contactName"
                         value={formData.contactName}
                         onChange={handleChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1466b8] focus:border-transparent outline-none"
                       />
                     </div>
 
@@ -117,7 +116,7 @@ export default function SettingsPage() {
                           name="email"
                           value={formData.email}
                           onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1466b8] focus:border-transparent outline-none"
                         />
                       </div>
 
@@ -130,7 +129,7 @@ export default function SettingsPage() {
                           name="phone"
                           value={formData.phone}
                           onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1466b8] focus:border-transparent outline-none"
                         />
                       </div>
                     </div>
@@ -144,12 +143,12 @@ export default function SettingsPage() {
                         name="address"
                         value={formData.address}
                         onChange={handleChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1466b8] focus:border-transparent outline-none"
                       />
                     </div>
 
-                    <button className="flex items-center gap-2 px-6 py-2 bg-[#1466b8] text-white rounded-lg font-semibold hover:bg-green-700 transition-colors">
-                      <Save className="w-4 h-4" />
+                    <button className="flex items-center gap-2 px-6 py-2 bg-[#1466b8] text-white rounded-lg font-semibold hover:bg-[#23496b] transition-colors">
+                      <Save className="w-4 h-4 hover:cursor-pointer" />
                       Save Changes
                     </button>
                   </div>
@@ -196,28 +195,28 @@ export default function SettingsPage() {
                           <p className="font-medium text-gray-900">{item.label}</p>
                           <p className="text-sm text-gray-500">{item.description}</p>
                         </div>
-                        <label className="relative inline-block w-12 h-7 bg-gray-300 rounded-full cursor-pointer">
+                        <label className={`relative inline-block w-12 h-7 rounded-full cursor-pointer transition-colors duration-200 ${notificationSettings[item.key as keyof typeof notificationSettings] ? 'bg-[#1466b8]' : 'bg-gray-300'
+                          }`}>
                           <input
                             type="checkbox"
                             checked={
                               notificationSettings[item.key as keyof typeof notificationSettings]
                             }
-                            onChange={() => handleNotificationChange(item.key)}
+                            onChange={() => handleNotificationChange(item.key as keyof typeof notificationSettings)}
                             className="opacity-0 w-0 h-0"
                           />
                           <span
-                            className={`absolute cursor-pointer top-1 left-1 w-5 h-5 rounded-full transition-all ${
-                              notificationSettings[item.key as keyof typeof notificationSettings]
-                                ? 'bg-[#1466b8] left-6'
-                                : 'bg-white'
-                            }`}
+                            className={`absolute cursor-pointer top-1 left-1 w-5 h-5 rounded-full transition-all ${notificationSettings[item.key as keyof typeof notificationSettings]
+                              ? 'bg-white left-6'
+                              : 'bg-gray-50'
+                              }`}
                           />
                         </label>
                       </div>
                     ))}
                   </div>
 
-                  <button className="flex items-center gap-2 px-6 py-2 bg-[#1466b8] text-white rounded-lg font-semibold hover:bg-green-700 transition-colors mt-6">
+                  <button className="flex items-center gap-2 px-6 py-2 bg-[#1466b8] text-white rounded-lg font-semibold hover:bg-[#23496b] transition-colors mt-6">
                     <Save className="w-4 h-4" />
                     Save Preferences
                   </button>
@@ -238,7 +237,7 @@ export default function SettingsPage() {
                         <p className="text-sm text-gray-500">Ending in 4821</p>
                         <p className="text-xs text-gray-400 mt-1">Primary payment method</p>
                       </div>
-                      <button className="text-gray-400 hover:text-red-600 transition-colors">
+                      <button className="px-4 py-2 text-sm font-medium hover:cursor-pointer text-red-600 border border-red-600 rounded-lg hover:bg-red-50 transition-colors">
                         Remove
                       </button>
                     </div>
@@ -249,13 +248,13 @@ export default function SettingsPage() {
                         <p className="text-sm text-gray-500">Ending in 4242</p>
                         <p className="text-xs text-gray-400 mt-1">Added 3 months ago</p>
                       </div>
-                      <button className="text-gray-400 hover:text-red-600 transition-colors">
+                      <button className="px-4 py-2 text-sm font-medium hover:cursor-pointer text-red-600 border border-red-600 rounded-lg hover:bg-red-50 transition-colors">
                         Remove
                       </button>
                     </div>
                   </div>
 
-                  <button className="flex items-center gap-2 px-6 py-2 bg-[#1466b8] text-white rounded-lg font-semibold hover:bg-green-700 transition-colors mt-6">
+                  <button className="flex items-center gap-2 px-6 py-2 bg-[#1466b8] text-white rounded-lg font-semibold hover:bg-[#23496b] transition-colors mt-6">
                     <CreditCard className="w-4 h-4" />
                     Add Payment Method
                   </button>
@@ -275,7 +274,7 @@ export default function SettingsPage() {
                         <p className="font-semibold text-gray-900">Password</p>
                         <p className="text-sm text-gray-500">Last changed 2 months ago</p>
                       </div>
-                      <button className="px-4 py-2 text-sm font-medium text-green-600 border border-green-600 rounded-lg hover:bg-green-50 transition-colors">
+                      <button className="px-4 py-2 text-sm font-medium hover:cursor-pointer text-red-600 border border-red-600 rounded-lg hover:bg-red-50 transition-colors">
                         Change
                       </button>
                     </div>
@@ -285,14 +284,20 @@ export default function SettingsPage() {
                         <p className="font-semibold text-gray-900">Two-Factor Authentication</p>
                         <p className="text-sm text-gray-500">Not enabled</p>
                       </div>
-                      <button className="px-4 py-2 text-sm font-medium text-green-600 border border-green-600 rounded-lg hover:bg-green-50 transition-colors">
+                      <button className="px-4 py-2 text-sm font-medium hover:cursor-pointer text-[#1466b8] border border-[#1466b8] rounded-lg transition-colors">
                         Enable
                       </button>
                     </div>
 
-                    <div className="border border-gray-200 rounded-lg p-4">
-                      <p className="font-semibold text-gray-900 mb-2">Active Sessions</p>
-                      <p className="text-sm text-gray-500">You are currently signed in on 1 device</p>
+                    <div className="border border-gray-200 rounded-lg p-4 items-start flex justify-between">
+                      <div>
+                        <p className="font-semibold text-gray-900 mb-2">Active Sessions</p>
+                        <p className="text-sm text-gray-500">You are currently signed in on 1 device</p>
+                      </div>
+
+                      <button className="px-6 py-2 text-sm font-medium hover:cursor-pointer text-[#1466b8] border border-[#1466b8] rounded-lg transition-colors">
+                        Show
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -300,7 +305,7 @@ export default function SettingsPage() {
             )}
           </div>
         </div>
-      </main>
-    </div>
+      </main >
+    </div >
   )
 }

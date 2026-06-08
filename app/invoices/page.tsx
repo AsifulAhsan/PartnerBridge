@@ -397,7 +397,7 @@ export default function InvoicesPage() {
               <button
                 onClick={() => setSelectedStatus(null)}
                 className={`px-3 py-1 rounded-sm text-[11px] font-bold transition-all uppercase tracking-wide shrink-0 ${!selectedStatus
-                  ? 'bg-brand-secondary text-white border border-[#23496b]'
+                  ? 'bg-[#1466b8] text-white border-0'
                   : 'bg-slate-100 text-slate-600 border border-slate-200/60 hover:bg-slate-200'
                   }`}
               >
@@ -408,7 +408,7 @@ export default function InvoicesPage() {
                   key={status}
                   onClick={() => setSelectedStatus(status)}
                   className={`px-3 py-1 rounded-sm text-[11px] font-bold uppercase transition-all tracking-wide shrink-0 ${selectedStatus === status
-                    ? 'bg-brand-secondary text-white border border-[#23496b]'
+                    ? 'bg-[#1466b8] text-white border-0'
                     : 'bg-slate-100 text-slate-600 border border-slate-200/60 hover:bg-slate-200'
                     }`}
                 >

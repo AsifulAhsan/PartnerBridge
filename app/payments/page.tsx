@@ -109,14 +109,14 @@ export default function PaymentsPage() {
               value={`৳${totalCompleted}`}
               unit="this month"
               icon={<CheckCircle />}
-              color="green"
+              color="blue"
             />
             <KPICard
               title="Pending Payments"
               value={`৳${totalPending}`}
               unit="awaiting payment"
               icon={<Clock />}
-              color="orange"
+              color="blue"
             />
             <KPICard
               title="Payment Methods"
@@ -137,19 +137,19 @@ export default function PaymentsPage() {
                   placeholder="Search payments by ID or invoice..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1466b8] focus:border-transparent outline-none"
                 />
               </div>
             </div>
 
             {/* Status Filters */}
             <div className="flex items-center gap-2 overflow-x-auto pb-2">
-              <Filter className="w-4 h-4 text-gray-500 flex-shrink-0" />
+              <Filter className="w-4 h-4 text-gray-500 shrink-0" />
               <button
                 onClick={() => setSelectedStatus(null)}
                 className={`px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                   !selectedStatus
-                    ? 'bg-green-100 text-green-700'
+                    ? 'bg-[#1466b8] text-white'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -161,7 +161,7 @@ export default function PaymentsPage() {
                   onClick={() => setSelectedStatus(status)}
                   className={`px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                     selectedStatus === status
-                      ? 'bg-green-100 text-green-700'
+                      ? 'bg-[#1466b8] text-white'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
                 >

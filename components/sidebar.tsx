@@ -83,7 +83,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                         : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                     }`}
                   >
-                    <Icon className={`w-[18px] h-[18px] shrink-0 ${isActive ? 'text-brandSecondary' : 'text-slate-400'}`} />
+                    <Icon className={`w-4.5 h-4.5 shrink-0 ${isActive ? 'text-brandSecondary' : 'text-slate-400'}`} />
                     <span>{item.label}</span>
                   </Link>
                 )
@@ -93,7 +93,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
           <div className="p-4 border-t border-slate-100 bg-slate-50">
             <button className="flex items-center gap-3 w-full px-3 py-2 text-sm font-semibold text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-sm transition-all hover:cursor-pointer">
-              <LogOut className="w-[18px] h-[18px] text-slate-400" />
+              <LogOut className="w-4.5 h-4.5 text-slate-400" />
               <span>Sign Out Session</span>
             </button>
           </div>

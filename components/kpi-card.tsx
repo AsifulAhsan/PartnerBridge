@@ -14,7 +14,7 @@ interface KPICardProps {
 }
 
 const colorMap = {
-  blue: 'border-[var(--status-blue)] bg-blue-50',
+  blue: '#1466b8',
   orange: 'border-[var(--status-orange)] bg-orange-50',
   green: 'border-[var(--status-green)] bg-green-50',
   purple: 'border-[var(--status-purple)] bg-purple-50',
