@@ -52,14 +52,16 @@ export default function OutstandingPage() {
   const overdueCount = outstandingData.filter((item) => item.daysOverdue > 0).length
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-background">
       <Sidebar />
 
       <main className="flex-1 overflow-auto md:ml-0">
-        <Header
-          title="Outstanding Management"
-          subtitle="Monitor and manage outstanding invoices"
-        />
+        <div className="bg-brand-secondary text-white shrink-0">
+          <Header
+            title="Outstanding Management"
+            subtitle="Monitor and manage outstanding invoices"
+          />
+        </div>
 
         <div className="p-6 md:p-8 space-y-8">
           {/* KPI Cards */}
@@ -105,7 +107,7 @@ export default function OutstandingPage() {
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="border-b border-gray-200 bg-gray-50">
+                <thead className="border-b border-gray-200 bg-background">
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700">
                       Invoice ID
@@ -132,7 +134,7 @@ export default function OutstandingPage() {
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {filteredData.map((item) => (
-                    <tr key={item.invoice} className="hover:bg-gray-50 transition-colors">
+                    <tr key={item.invoice} className="hover:bg-background transition-colors">
                       <td className="px-6 py-4">
                         <span className="font-semibold text-gray-900">{item.invoice}</span>
                       </td>

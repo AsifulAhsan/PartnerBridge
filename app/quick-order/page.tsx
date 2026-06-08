@@ -204,7 +204,7 @@ export default function QuickOrderPage() {
             </p>
             <p className="pt-4">
               Generated System ID:{" "}
-              <span className="font-mono font-bold text-blue-800">
+              <span className="font-mono font-bold text-brand-secondary">
                 PO-{orderId}
               </span>
             </p>
@@ -224,11 +224,11 @@ export default function QuickOrderPage() {
   }
 
   return (
-    <div className="flex h-screen bg-[#EAEFF4]">
+    <div className="flex h-screen bg-background">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <main className="flex-1 overflow-auto md:ml-0 flex flex-col">
-        <div className="bg-[#23496b] text-white">
+        <div className="bg-brand-secondary text-white">
           <Header
             title="Quick Order Entry"
             subtitle="Search and directly stage catalog products into line distribution sheets"
@@ -237,12 +237,12 @@ export default function QuickOrderPage() {
         </div>
 
         <div className="bg-white border-b border-slate-200 px-4 sm:px-6 py-2.5 flex items-center gap-2 text-xs text-slate-500 font-medium shrink-0 overflow-x-auto whitespace-nowrap">
-          <Home className="w-3.5 h-3.5 text-blue-800 shrink-0" />
-          <span className="text-blue-800 font-semibold hover:underline cursor-pointer">
+          <Home className="w-3.5 h-3.5 text-brand-secondary shrink-0" />
+          <span className="text-brand-secondary font-semibold hover:underline cursor-pointer">
             Home
           </span>
           <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
-          <span className="text-blue-800 font-semibold hover:underline cursor-pointer">
+          <span className="text-brand-secondary font-semibold hover:underline cursor-pointer">
             Sales
           </span>
           <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
@@ -296,7 +296,7 @@ export default function QuickOrderPage() {
                 <button
                   onClick={() => setSelectedCategory(null)}
                   className={`px-3 py-1 rounded-sm text-xs font-bold transition-all shrink-0 ${!selectedCategory
-                      ? 'bg-[#23496b] text-white border border-[#23496b]'
+                      ? 'bg-brand-secondary text-white border border-[#23496b]'
                       : 'bg-slate-100 text-slate-600 border border-slate-200/60 hover:bg-slate-200'
                     }`}
                 >
@@ -307,7 +307,7 @@ export default function QuickOrderPage() {
                     key={category}
                     onClick={() => setSelectedCategory(category)}
                     className={`px-3 py-1 rounded-sm text-xs font-bold transition-all shrink-0 ${selectedCategory === category
-                        ? 'bg-[#23496b] text-white border border-[#23496b]'
+                        ? 'bg-brand-secondary text-white border border-[#23496b]'
                         : 'bg-slate-100 text-slate-600 border border-slate-200/60 hover:bg-slate-200'
                       }`}
                   >
@@ -384,7 +384,7 @@ export default function QuickOrderPage() {
                       type="default"
                       icon={<PlusOutlined />}
                       onClick={() => addToCart(product)}
-                      className="w-full bg-[#23496b]! hover:bg-[#152842]! text-white! h-9 text-xs font-bold rounded-sm border-none shadow-xs"
+                      className="w-full bg-brand-secondary! hover:bg-[#152842]! text-white! h-9 text-xs font-bold rounded-sm border-none shadow-xs"
                     >
                       Add to Order Draft
                     </Button>
@@ -457,7 +457,7 @@ export default function QuickOrderPage() {
                         type="default"
                         icon={<PlusOutlined />}
                         onClick={() => addToCart(product)}
-                        className="bg-slate-50 hover:bg-[#23496b]! border border-slate-200 text-slate-700 hover:text-white! w-full sm:w-8 h-8 rounded-sm p-0 flex items-center justify-center transition-all shadow-2xs text-xs sm:text-sm px-4 sm:px-0"
+                        className="bg-slate-50 hover:bg-brand-secondary! border border-slate-200 text-slate-700 hover:text-white! w-full sm:w-8 h-8 rounded-sm p-0 flex items-center justify-center transition-all shadow-2xs text-xs sm:text-sm px-4 sm:px-0"
                         title="Add to sheet"
                       >
                         <span className="inline-block sm:hidden ml-2">
@@ -584,7 +584,7 @@ export default function QuickOrderPage() {
                     type="primary"
                     size="middle"
                     onClick={() => setIsModalOpen(true)}
-                    className="w-full bg-[#23496b]! hover:bg-[#152842]! text-white h-10 font-bold rounded-sm border-none flex items-center justify-center gap-2 py-5! text-xs tracking-wide shadow-xs"
+                    className="w-full bg-brand-secondary! hover:bg-[#152842]! text-white h-10 font-bold rounded-sm border-none flex items-center justify-center gap-2 py-5! text-xs tracking-wide shadow-xs"
                   >
                     Submit Order
                   </Button>

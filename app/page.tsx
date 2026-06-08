@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Eye, EyeOff, LogIn, HelpCircle } from 'lucide-react'
+import { Eye, EyeOff, LogIn, HelpCircle, ShoppingCart, Truck, FileText, PackageCheck } from 'lucide-react'
+import Image from 'next/image'
 
 export default function LoginPage() {
   const [phone, setPhone] = useState('')
@@ -19,125 +20,196 @@ export default function LoginPage() {
     }, 1000)
   }
 
+  const features = [
+    { icon: ShoppingCart, label: 'Place Orders', desc: 'Direct order entry with live catalog & pricing' },
+    { icon: PackageCheck, label: 'Track Orders', desc: 'Real-time order status from dispatch to delivery' },
+    { icon: FileText, label: 'Invoice Access', desc: 'View, download & reconcile invoices instantly' },
+    { icon: Truck, label: 'Delivery Tracking', desc: 'Follow shipments & confirm receipt online' },
+  ]
+
   return (
-    <div className="min-h-screen bg-[#EAEFF4] flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* SaleSense SFA Corporate Branding Logo */}
-        <div className="flex justify-center mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-[#23496b] rounded-sm flex items-center justify-center shadow-xs">
-              <span className="text-white font-black text-2xl tracking-tighter">S</span>
+    <div className="min-h-screen flex">
+      {/* Left Panel — Branding */}
+      <div className="hidden lg:flex lg:w-1/2 xl:w-[55%] relative flex-col justify-between overflow-hidden">
+        {/* Gradient Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1a3a5c] via-[#23496B] to-[#3A73A6]" />
+        
+        {/* Decorative Elements */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl" />
+        <div className="absolute top-1/3 left-1/4 w-64 h-64 bg-[#3A73A6]/20 rounded-full blur-2xl" />
+
+        <div className="relative z-10 p-12 xl:p-16">
+          {/* Logo */}
+          <div className="flex items-center gap-3 mb-12">
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center shadow-sm overflow-hidden shrink-0">
+              <Image src="/logo.png" alt="SaleSense" width={36} height={36} className="object-contain" />
             </div>
             <div>
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none">PartnerBridge</h1>
-              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1">SalesSense SFA</p>
+              <span className="text-xl font-black text-white tracking-tight leading-none block">SaleSense</span>
+              <span className="text-xs font-bold text-blue-200/80 uppercase tracking-wider mt-0.5 block">SFA PartnerBridge</span>
             </div>
+          </div>
+
+          {/* Hero Text */}
+          <div className="max-w-lg mb-10">
+            <h1 className="text-2xl lg:text-3xl xl:text-4xl font-black text-white leading-tight">
+              Dealer & Partner Automation
+            </h1>
+          </div>
+
+          {/* Feature Grid */}
+          <div className="grid grid-cols-2 gap-5 max-w-lg">
+            {features.map((f) => (
+              <div
+                key={f.label}
+                className="flex flex-col items-start gap-4 p-5 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-colors"
+              >
+                <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+                  <f.icon className="w-6 h-6 text-blue-200" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-white">{f.label}</p>
+                  <p className="text-xs text-blue-200/70 mt-1 leading-relaxed">{f.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Form Container Module */}
-        <div className="bg-white rounded-md border border-slate-200 shadow-xs p-8 space-y-5">
-          <div className="text-center pb-2">
-            <h2 className="text-xl font-bold text-[#23496b] tracking-tight">System Authentication</h2>
-            <p className="text-xs text-slate-500 font-medium mt-1">Sign in to directly stage catalog items into logistics distribution paths</p>
+        {/* Footer */}
+        <div className="relative z-10 px-12 xl:px-16 pb-8">
+          <div className="flex items-center gap-4 text-xs text-blue-200/60 font-medium">
+            <span>© 2026 SaleSense SFA</span>
+            <span className="w-1 h-1 rounded-full bg-blue-300/40" />
+            <a href="#" className="hover:text-blue-200 transition-colors">Privacy Policy</a>
+            <span className="w-1 h-1 rounded-full bg-blue-300/40" />
+            <a href="#" className="hover:text-blue-200 transition-colors">Terms of Service</a>
           </div>
+        </div>
+      </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Phone Input Node */}
-            <div>
-              <label htmlFor="phone" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Phone Number
-              </label>
-              <input
-                id="phone"
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="01734520260"
-                className="w-full h-10 px-3 py-2 border border-slate-300 rounded-sm focus:ring-1 focus:ring-[#23496b] focus:border-[#23496b] outline-none text-xs text-slate-900 font-medium transition-all"
-                required
-              />
+      {/* Right Panel — Login Form */}
+      <div className="flex-1 flex flex-col justify-center items-center bg-[#f4f7fa] p-4 sm:p-6 relative">
+        {/* Mobile Logo */}
+        <div className="lg:hidden flex items-center gap-3 mb-8">
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center shadow-sm overflow-hidden shrink-0">
+            <Image src="/logo.png" alt="SaleSense" width={36} height={36} className="object-contain" />
+          </div>
+          <div>
+            <span className="text-lg font-black text-slate-900 tracking-tight leading-none block">SaleSense</span>
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-0.5 block">SFA PartnerBridge</span>
+          </div>
+        </div>
+
+        <div className="w-full max-w-sm">
+          {/* Form Card */}
+          <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-8 space-y-6">
+            <div className="text-center">
+              <h2 className="text-lg font-bold text-[#23496B] tracking-tight">Partner Portal Login</h2>
             </div>
 
-            {/* Password Input Node */}
-            <div>
-              <label htmlFor="password" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Password
-              </label>
-              <div className="relative">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Phone */}
+              <div>
+                <label htmlFor="phone" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Phone Number
+                </label>
                 <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full h-10 px-3 py-2 border border-slate-300 rounded-sm focus:ring-1 focus:ring-[#23496b] focus:border-[#23496b] outline-none text-xs text-slate-900 tracking-widest focus:tracking-normal font-medium transition-all"
+                  id="phone"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="01734520260"
+                  className="w-full h-10 px-3.5 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#3A73A6]/20 focus:border-[#3A73A6] outline-none text-sm text-slate-900 font-medium transition-all placeholder:text-slate-400"
                   required
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 transition-colors"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
+              </div>
+
+              {/* Password */}
+              <div>
+                <label htmlFor="password" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    className="w-full h-10 px-3.5 py-2 pr-10 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#3A73A6]/20 focus:border-[#3A73A6] outline-none text-sm text-slate-900 tracking-widest focus:tracking-normal font-medium transition-all placeholder:text-slate-400"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Remember / Forgot */}
+              <div className="flex items-center justify-between text-xs">
+                <label className="flex items-center gap-2 font-medium text-slate-600 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 rounded border-slate-300 text-[#3A73A6] focus:ring-[#3A73A6]"
+                  />
+                  Remember me
+                </label>
+                <a href="#" className="text-[#3A73A6] hover:text-[#23496B] font-semibold transition-colors">
+                  Forgot Password?
+                </a>
+              </div>
+
+              {/* Submit */}
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full h-10 flex items-center justify-center gap-2 bg-gradient-to-r from-[#23496B] to-[#3A73A6] hover:from-[#1a3a5c] hover:to-[#2d5d85] text-white text-sm font-bold rounded-lg border-none shadow-sm transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <LogIn className="w-4 h-4" />
+                {isLoading ? 'Authenticating...' : 'Sign In'}
+              </button>
+            </form>
+
+            {/* Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-100" />
+              </div>
+              <div className="relative flex justify-center text-xs font-bold uppercase tracking-wider">
+                <span className="px-3 bg-white text-slate-400 flex items-center gap-1.5">
+                  <HelpCircle className="w-3 h-3" /> Need Help?
+                </span>
               </div>
             </div>
 
-            {/* Remember Me / Forgot Password Layout Context */}
-            <div className="flex items-center justify-between text-xs pt-1">
-              <label className="flex items-center gap-2 font-medium text-slate-600 cursor-pointer select-none">
-                <input type="checkbox" className="rounded-xs border-slate-300 text-[#23496b] focus:ring-[#23496b]" />
-                Remember active session
-              </label>
-              <a href="#" className="text-[#23496b]/60 hover:text-[#23496b]/80 hover:underline font-bold">
-                Forgot Password?
+            {/* Support Buttons */}
+            <div className="grid grid-cols-2 gap-2.5">
+              <a
+                href="#"
+                className="px-3 py-2.5 border border-slate-200 hover:border-[#3A73A6]/30 hover:bg-[#3A73A6]/5 rounded-lg text-xs font-semibold text-slate-600 hover:text-[#3A73A6] transition-all text-center"
+              >
+                Contact Support
+              </a>
+              <a
+                href="#"
+                className="px-3 py-2.5 border border-slate-200 hover:border-[#3A73A6]/30 hover:bg-[#3A73A6]/5 rounded-lg text-xs font-semibold text-slate-600 hover:text-[#3A73A6] transition-all text-center"
+              >
+                Documentation
               </a>
             </div>
-
-            {/* Login Submission Execution operation */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full h-10 mt-2 flex items-center justify-center gap-2 bg-[#23496b] hover:bg-[#152842] text-white text-xs font-bold rounded-sm border-none shadow-xs transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <LogIn className="w-4 h-4" />
-              {isLoading ? 'Checking...' : 'Authorize Session'}
-            </button>
-          </form>
-
-          {/* Operational Support Grid Segment */}
-          <div className="relative pt-2">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-100" />
-            </div>
-            <div className="relative flex justify-center text-[10px] font-bold uppercase tracking-wider">
-              <span className="px-2 bg-white text-slate-400 flex items-center gap-1">
-                <HelpCircle className="w-3 h-3" /> Technical Assistance
-              </span>
-            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 pt-0.5">
-            <a
-              href="#"
-              className="px-3 py-2 border border-slate-200 hover:border-slate-300 rounded-sm text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all text-center"
-            >
-              Contact Support Node
-            </a>
-            <a
-              href="#"
-              className="px-3 py-2 border border-slate-200 hover:border-slate-300 rounded-sm text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all text-center"
-            >
-              SFA Documentation
-            </a>
-          </div>
+          {/* Mobile Footer */}
+          <p className="lg:hidden text-center text-xs font-bold text-slate-400 uppercase tracking-widest mt-6">
+            © 2026 SaleSense SFA. All rights reserved.
+          </p>
         </div>
-
-        {/* Footer Ledger */}
-        <p className="text-center text-[10px] font-bold font-mono text-slate-400 uppercase tracking-widest mt-6">
-          © 2026 SaleSense SFA PartnerBride. All rights reserved.
-        </p>
       </div>
     </div>
   )

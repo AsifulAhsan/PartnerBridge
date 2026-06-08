@@ -27,6 +27,7 @@ import {
   Divider,
   Spin,
   message,
+  Descriptions,
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import axios from 'axios'
@@ -108,7 +109,7 @@ export default function OrdersPage() {
   const fetchOrders = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await axios.get(`${API_BASE}/me-user/area-orders`, {
+      const res = await axios.get(`${API_BASE}/me-user/area-orders?fromDate=1000000`, {
         headers: { Authorization: `Bearer ${ACCESS_TOKEN}` },
       })
       const data = Array.isArray(res.data) ? res.data : res.data?.data ?? []
@@ -155,7 +156,7 @@ export default function OrdersPage() {
         name: p.product?.name || p.variant?.name || 'Product',
         quantity: p.quantity ?? 0,
         unitPrice: p.price ?? 0,
-        total: p.subTotal ?? p.totalWithVat ?? p.price * p.quantity ?? 0,
+        total: p.subTotal ?? p.totalWithVat ?? (p.price ?? 0) * (p.quantity ?? 0),
         size: p.variant?.unit
           ? `${p.variant.baseUnitSize || ''}${p.variant.unit}`
           : 'Standard',
@@ -201,7 +202,7 @@ export default function OrdersPage() {
       key: 'id',
       width: 140,
       align: 'left',
-      className: 'text-xs font-bold text-slate-900 font-mono tracking-tight pl-4',
+      className: 'text-sm font-bold text-slate-900 font-mono tracking-tight pl-4',
     },
     {
       title: 'Customer Dealer / Farm',
@@ -209,7 +210,7 @@ export default function OrdersPage() {
       key: 'customer',
       align: 'left',
       ellipsis: true,
-      className: 'text-xs font-semibold text-slate-800',
+      className: 'text-sm font-semibold text-slate-800',
     },
     {
       title: 'Staged Date',
@@ -217,7 +218,7 @@ export default function OrdersPage() {
       key: 'date',
       width: 120,
       align: 'left',
-      className: 'text-xs text-slate-500 font-medium',
+      className: 'text-sm text-slate-500 font-medium',
     },
     {
       title: 'Distribution Summary',
@@ -225,7 +226,7 @@ export default function OrdersPage() {
       key: 'items',
       align: 'left',
       ellipsis: true,
-      className: 'text-xs text-slate-500 font-medium',
+      className: 'text-sm text-slate-500 font-medium',
     },
     {
       title: 'Status',
@@ -238,7 +239,7 @@ export default function OrdersPage() {
           statusConfig[status as keyof typeof statusConfig] ||
           statusConfig.pending
         return (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200/80 text-slate-700 font-semibold text-[11px] tracking-wide">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200/80 text-slate-700 font-semibold text-sm tracking-wide">
             <span className={`w-1.5 h-1.5 rounded-full ${config.dotColor}`} />
             {config.label}
           </span>
@@ -252,7 +253,7 @@ export default function OrdersPage() {
       width: 120,
       align: 'right',
       render: (value: number) => (
-        <span className="font-bold text-slate-900 text-xs tracking-tight pr-4">
+        <span className="font-bold text-slate-900 text-sm tracking-tight pr-4">
           TK {value.toLocaleString('en-IN')}
         </span>
       ),
@@ -277,17 +278,17 @@ export default function OrdersPage() {
     drawerProducts.length > 0 ? drawerProducts : selectedOrder?.productsList ?? []
 
   return (
-    <div className="flex h-screen bg-[#EAEFF4]">
+    <div className="flex h-screen bg-background">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <main className="flex-1 overflow-auto md:ml-0 flex flex-col w-full">
-        <div className="bg-[#23496b] text-white shrink-0">
+        <div className="bg-brand-secondary text-white shrink-0">
           <Header
             title="SalesSense"
             subtitle="Navigate To Your Menu"
             onMenuToggle={() => setSidebarOpen(true)}
             actions={
-              <button className="flex items-center gap-2 px-3 py-1.5 bg-[#23496b]/30 hover:bg-[#152842]/50 text-white border border-white/20 rounded-sm font-bold text-xs tracking-wide transition-colors">
+              <button className="flex items-center gap-2 px-3 py-1.5 bg-brand-secondary/30 hover:bg-[#152842]/50 text-white border border-white/20 rounded-sm font-bold text-xs tracking-wide transition-colors">
                 <Download className="w-3.5 h-3.5" />
                 Export Channel Data
               </button>
@@ -296,12 +297,12 @@ export default function OrdersPage() {
         </div>
 
         <div className="bg-white border-b border-slate-200 px-4 sm:px-6 py-2.5 flex items-center gap-2 text-xs text-slate-500 font-medium shrink-0 overflow-x-auto whitespace-nowrap scrollbar-none">
-          <Home className="w-3.5 h-3.5 text-blue-800 shrink-0" />
-          <span className="text-blue-800 font-semibold hover:underline cursor-pointer">
+          <Home className="w-3.5 h-3.5 text-brand-secondary shrink-0" />
+          <span className="text-brand-secondary font-semibold hover:underline cursor-pointer">
             Home
           </span>
           <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
-          <span className="text-blue-800 font-semibold hover:underline cursor-pointer">
+          <span className="text-brand-secondary font-semibold hover:underline cursor-pointer">
             Sales
           </span>
           <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
@@ -346,11 +347,10 @@ export default function OrdersPage() {
               </span>
               <button
                 onClick={() => setSelectedStatus(null)}
-                className={`px-3 py-1 rounded-sm text-[11px] font-bold transition-all uppercase tracking-wide shrink-0 ${
-                  !selectedStatus
-                    ? 'bg-[#23496b] text-white border border-[#23496b]'
-                    : 'bg-slate-100 text-slate-600 border border-slate-200/60 hover:bg-slate-200'
-                }`}
+                className={`px-3 py-1 rounded-sm text-[11px] font-bold transition-all uppercase tracking-wide shrink-0 ${!selectedStatus
+                  ? 'bg-brand-secondary text-white border border-[#23496b]'
+                  : 'bg-slate-100 text-slate-600 border border-slate-200/60 hover:bg-slate-200'
+                  }`}
               >
                 All Regional Logs
               </button>
@@ -358,11 +358,10 @@ export default function OrdersPage() {
                 <button
                   key={status}
                   onClick={() => setSelectedStatus(status)}
-                  className={`px-3 py-1 rounded-sm text-[11px] font-bold uppercase transition-all tracking-wide shrink-0 ${
-                    selectedStatus === status
-                      ? 'bg-[#23496b] text-white border border-[#23496b]'
-                      : 'bg-slate-100 text-slate-600 border border-slate-200/60 hover:bg-slate-200'
-                  }`}
+                  className={`px-3 py-1 rounded-sm text-[11px] font-bold uppercase transition-all tracking-wide shrink-0 ${selectedStatus === status
+                    ? 'bg-brand-secondary text-white border border-[#23496b]'
+                    : 'bg-slate-100 text-slate-600 border border-slate-200/60 hover:bg-slate-200'
+                    }`}
                 >
                   {statusConfig[status as keyof typeof statusConfig].label}
                 </button>
@@ -435,7 +434,7 @@ export default function OrdersPage() {
                       size="small"
                       icon={<Eye className="w-3.5 h-3.5 text-slate-600" />}
                       onClick={() => handleOpenDrawer(order)}
-                      className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 h-8 bg-slate-50 border-slate-200"
+                      className="inline-flex items-center gap-1 text-sm font-semibold px-2.5 h-8 bg-slate-50 border-slate-200"
                     >
                       View Details
                     </Button>
@@ -461,11 +460,10 @@ export default function OrdersPage() {
             {selectedOrder && (
               <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-slate-100 border border-slate-200 text-slate-700 font-bold text-[10px] uppercase">
                 <span
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    statusConfig[
-                      selectedOrder.status as keyof typeof statusConfig
-                    ]?.dotColor
-                  }`}
+                  className={`w-1.5 h-1.5 rounded-full ${statusConfig[
+                    selectedOrder.status as keyof typeof statusConfig
+                  ]?.dotColor
+                    }`}
                 />
                 {
                   statusConfig[
@@ -477,10 +475,10 @@ export default function OrdersPage() {
           </div>
         }
         placement="right"
-        width={
+        size={
           typeof window !== 'undefined' && window.innerWidth < 640
             ? '100%'
-            : 500
+            : 720
         }
         onClose={() => setIsDrawerOpen(false)}
         open={isDrawerOpen}
@@ -500,170 +498,123 @@ export default function OrdersPage() {
       >
         {selectedOrder && (
           <div className="space-y-5 text-xs">
-            <div>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">
-                Logistics Scope Statement
-              </p>
-              <div className="bg-slate-50 border border-slate-200 rounded-sm p-3 space-y-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-4">
-                  <div>
-                    <span className="text-slate-400 block font-medium items-center gap-1">
-                      <FileText className="w-3 h-3 text-slate-400 inline mr-1" />{' '}
-                      Dealer Account
-                    </span>
-                    <span className="font-bold text-slate-800">
-                      {selectedOrder.customer}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block font-medium">
-                      Contact Node
-                    </span>
-                    <span className="font-bold text-slate-700 font-mono">
-                      {selectedOrder.phone}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block font-medium items-center gap-1">
-                      <Calendar className="w-3 h-3 text-slate-400 inline mr-1" />{' '}
-                      Staged Date
-                    </span>
-                    <span className="font-bold text-slate-700">
-                      {selectedOrder.date}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block font-medium items-center gap-1">
-                      <DollarSign className="w-3 h-3 text-slate-400 inline mr-1" />{' '}
-                      Settlement Protocol
-                    </span>
-                    <span className="font-bold text-slate-800">
-                      {selectedOrder.paymentMethod}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <Descriptions
+              title="Logistics Scope Statement"
+              bordered
+              size="small"
+              column={1}
+              layout="horizontal"
+              labelStyle={{ fontWeight: 600, color: '#64748B', width: '40%', fontSize: '14px' }}
+              contentStyle={{ fontWeight: 700, color: '#1E293B', fontSize: '14px' }}
+            >
+              <Descriptions.Item label="Dealer Account">
+                {selectedOrder.customer}
+              </Descriptions.Item>
+              <Descriptions.Item label="Contact Node">
+                {selectedOrder.phone}
+              </Descriptions.Item>
+              <Descriptions.Item label="Staged Date">
+                {selectedOrder.date}
+              </Descriptions.Item>
+              <Descriptions.Item label="Settlement Protocol">
+                {selectedOrder.paymentMethod}
+              </Descriptions.Item>
+            </Descriptions>
+
+            <Descriptions
+              title="Distribution Waybill"
+              bordered
+              size="small"
+              column={1}
+              layout="horizontal"
+              labelStyle={{ fontWeight: 600, color: '#64748B', width: '40%', fontSize: '14px' }}
+              contentStyle={{ fontWeight: 700, color: '#1E293B', fontSize: '14px' }}
+            >
+              <Descriptions.Item label="Delivery Base Station">
+                {selectedOrder.address}
+              </Descriptions.Item>
+              <Descriptions.Item label="Dispatched Freight Mode">
+                {selectedOrder.shippingMethod}
+              </Descriptions.Item>
+            </Descriptions>
 
             <div className="space-y-2">
-              <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Truck className="w-3.5 h-3.5" /> Distribution Waybill
-              </h3>
-              <div className="border border-slate-200 rounded-sm p-3 space-y-3 bg-white">
-                <div className="flex items-start gap-2">
-                  <MapPin className="w-3.5 h-3.5 text-slate-400 mt-0.5 shrink-0" />
-                  <div>
-                    <span className="text-slate-400 block font-medium">
-                      Delivery Base Station
-                    </span>
-                    <p className="font-bold text-slate-800 mt-0.5 leading-relaxed">
-                      {selectedOrder.address}
-                    </p>
-                  </div>
-                </div>
-                <Divider className="my-1.5" />
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                  <div>
-                    <span className="text-slate-400 block font-medium">
-                      Dispatched Freight Mode
-                    </span>
-                    <span className="font-bold text-slate-800">
-                      {selectedOrder.shippingMethod}
-                    </span>
-                  </div>
-                  <span className="inline-flex items-center self-start sm:self-auto px-2 py-0.5 font-bold text-[9px] uppercase border border-slate-200 rounded-sm bg-slate-50 text-slate-600">
-                    Authorized Fleet
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+              <h3 className="text-[13px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                 <ShoppingBag className="w-3.5 h-3.5" /> Product Dispatches
               </h3>
-              <div className="border border-slate-200 rounded-sm overflow-hidden bg-white overflow-x-auto">
+              <div className="border border-slate-200 rounded-sm overflow-hidden bg-white">
                 <Spin spinning={drawerLoading}>
-                  <table className="w-full text-xs min-w-95">
-                    <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
-                      <tr>
-                        <th className="px-3 py-2 text-left">Product Item</th>
-                        <th className="px-3 py-2 text-center">Bags</th>
-                        <th className="px-3 py-2 text-right">Unit</th>
-                        <th className="px-3 py-2 text-right">Total</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-                      {displayProducts.length > 0 ? (
-                        displayProducts.map((prod, idx) => (
-                          <tr key={idx} className="hover:bg-slate-50/50">
-                            <td className="px-3 py-2.5">
-                              <p className="font-bold text-slate-900">
-                                {prod.name}
-                              </p>
-                              <span className="text-[9px] text-slate-400 font-bold font-mono">
-                                SKU: {prod.sku} | {prod.size}
-                              </span>
-                            </td>
-                            <td className="px-3 py-2.5 text-center font-bold text-slate-900">
-                              {prod.quantity}
-                            </td>
-                            <td className="px-3 py-2.5 text-right text-slate-400">
-                              TK {prod.unitPrice.toLocaleString('en-IN')}
-                            </td>
-                            <td className="px-3 py-2.5 text-right font-bold text-slate-900">
-                              TK {prod.total.toLocaleString('en-IN')}
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td
-                            colSpan={4}
-                            className="px-3 py-4 text-center text-slate-400"
-                          >
-                            No product line items found.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                  <Table
+                    columns={[
+                      {
+                        title: <span style={{ fontSize: '14px' }}>Product Item</span>,
+                        dataIndex: 'name',
+                        key: 'name',
+                        render: (_: string, record: OrderProduct) => (
+                          <div>
+                            <p style={{ fontSize: '14px', fontWeight: 700, color: '#1E293B' }}>{record.name}</p>
+                            <span style={{ fontSize: '14px', color: '#94A3B8', fontFamily: 'monospace' }}>
+                              SKU: {record.sku} | {record.size}
+                            </span>
+                          </div>
+                        ),
+                      },
+                      {
+                        title: <span style={{ fontSize: '14px' }}>Bags</span>,
+                        dataIndex: 'quantity',
+                        key: 'quantity',
+                        align: 'center',
+                        render: (qty: number) => <span style={{ fontSize: '14px', fontWeight: 700, color: '#1E293B' }}>{qty}</span>,
+                      },
+                      {
+                        title: <span style={{ fontSize: '14px' }}>Unit</span>,
+                        dataIndex: 'unitPrice',
+                        key: 'unitPrice',
+                        align: 'right',
+                        render: (price: number) => <span style={{ fontSize: '14px', color: '#64748B' }}>TK {price.toLocaleString('en-IN')}</span>,
+                      },
+                      {
+                        title: <span style={{ fontSize: '14px' }}>Total</span>,
+                        dataIndex: 'total',
+                        key: 'total',
+                        align: 'right',
+                        render: (total: number) => <span style={{ fontSize: '14px', fontWeight: 700, color: '#1E293B' }}>TK {total.toLocaleString('en-IN')}</span>,
+                      },
+                    ]}
+                    dataSource={displayProducts}
+                    rowKey={(r) => r.sku}
+                    pagination={false}
+                    size="small"
+                    locale={{ emptyText: 'No product line items found.' }}
+                  />
                 </Spin>
               </div>
             </div>
 
             <div className="bg-slate-50 border border-slate-200 rounded-sm p-3.5">
               <div className="space-y-1.5">
-                <div className="flex justify-between text-slate-500 font-medium">
+                <div className="flex justify-between" style={{ fontSize: '14px', fontWeight: 500, color: '#64748B' }}>
                   <span>Gross Item Subtotal:</span>
-                  <span className="text-slate-900 font-bold">
+                  <span style={{ fontWeight: 700, color: '#1E293B' }}>
                     TK {selectedOrder.total.toLocaleString('en-IN')}
                   </span>
                 </div>
-                <div className="flex justify-between text-slate-500 font-medium">
+                <div className="flex justify-between" style={{ fontSize: '14px', fontWeight: 500, color: '#64748B' }}>
                   <span>AIT (Advance Income Tax) & VAT:</span>
-                  <span className="text-slate-800 font-bold">Included</span>
+                  <span style={{ fontWeight: 700, color: '#1E293B' }}>Included</span>
                 </div>
-                <div className="flex justify-between text-slate-500 font-medium">
+                <div className="flex justify-between" style={{ fontSize: '14px', fontWeight: 500, color: '#64748B' }}>
                   <span>FOB Transport Surcharge:</span>
-                  <span className="text-slate-800 font-bold">TK 0</span>
+                  <span style={{ fontWeight: 700, color: '#1E293B' }}>TK 0</span>
                 </div>
                 <Divider dashed className="my-2" />
                 <div className="flex justify-between items-center">
-                  <span className="text-xs font-bold text-slate-900 uppercase tracking-wide">
+                  <span style={{ fontSize: '14px', fontWeight: 700, color: '#1E293B' }}>
                     Net Payables:
                   </span>
-                  <Statistic
-                    value={selectedOrder.total}
-                    prefix="TK"
-                    styles={{
-                      content: {
-                        fontSize: '18px',
-                        fontWeight: 900,
-                        color: '#23496b',
-                      },
-                    }}
-                  />
+                  <span style={{ fontSize: '18px', fontWeight: 900, color: '#23496b' }}>
+                    TK {selectedOrder.total.toLocaleString('en-IN')}
+                  </span>
                 </div>
               </div>
             </div>

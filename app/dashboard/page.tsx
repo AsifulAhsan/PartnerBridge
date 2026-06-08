@@ -28,6 +28,7 @@ import {
   Pie,
   Cell,
 } from 'recharts'
+import { AppColorPalette } from '@/lib/theme'
 
 const weeklyLogisticsData = [
   { name: 'Saturday', dispatches: 12, value: 240000 },
@@ -40,7 +41,7 @@ const weeklyLogisticsData = [
 ]
 
 const creditDistribution = [
-  { name: 'Available Credit Line', value: 65, fill: '#1F3A60' },
+  { name: 'Available Credit Line', value: 65, fill: AppColorPalette.brandSecondary },
   { name: 'Utilized Credit', value: 25, fill: '#4B5563' },
   { name: 'Escrowed/Reserved Pool', value: 10, fill: '#9CA3AF' },
 ]
@@ -128,7 +129,7 @@ export default function Dashboard() {
         if (status === 'in-transit') tagColor = 'cyan';
         if (status === 'processing') tagColor = 'warning';
         return (
-          <Tag color={tagColor} className="rounded-sm font-bold uppercase text-[10px] px-2 py-0.5">
+          <Tag color={tagColor} className="rounded-sm font-bold uppercase text-xs px-2 py-0.5">
             {status.replace('-', ' ')}
           </Tag>
         )
@@ -150,11 +151,11 @@ export default function Dashboard() {
   ]
   const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
-    <div className="flex h-screen bg-[#EAEFF4]">
+    <div className="flex h-screen bg-background">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <main className="flex-1 overflow-auto md:ml-0">
-        <div className="bg-[#1F3A60] text-white">
+        <div className="bg-brand-secondary text-white">
           <Header
             title="Business to Business Order Management System"
             subtitle="Regional distribution node operations and liquidity tracking metrics"
@@ -162,11 +163,11 @@ export default function Dashboard() {
           />
         </div>
 
-        <div className="bg-white border-b border-slate-200 px-4 sm:px-6 py-2.5 flex items-center gap-2 text-xs text-slate-500 font-medium overflow-x-auto whitespace-nowrap">
-          <Home className="w-3.5 h-3.5 text-blue-800 shrink-0" />
-          <span className="text-blue-800 font-semibold hover:underline cursor-pointer">Home</span>
+        <div className="bg-white border-b border-slate-200 px-4 sm:px-6 py-2.5 flex items-center gap-2 text-sm text-slate-500 font-medium overflow-x-auto whitespace-nowrap">
+          <Home className="w-3.5 h-3.5 text-brand-secondary shrink-0" />
+          <span className="text-brand-secondary font-semibold hover:underline cursor-pointer">Home</span>
           <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
-          <span className="text-blue-800 font-semibold hover:underline cursor-pointer">Reports</span>
+          <span className="text-brand-secondary font-semibold hover:underline cursor-pointer">Reports</span>
           <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
           <span className="text-slate-600">Sales Dashboard</span>
         </div>
@@ -178,15 +179,15 @@ export default function Dashboard() {
                 variant='borderless'
                 onClick={() => setActiveKpi('orders')}
                 styles={{ body: { padding: '16px' } }}
-                className={`rounded-md transition-all shadow-sm border-slate-200 ${activeKpi === 'orders' ? 'border-blue-800 ring-1 ring-blue-800/20' : ''}`}
+                className={`rounded-md transition-all shadow-sm border-slate-200 ${activeKpi === 'orders' ? 'border-brand-secondary ring-1 ring-brand-secondary/20' : ''}`}
               >
                 <div className="text-center">
-                  <p className="text-xs font-semibold text-slate-600 mb-1">Primary Ordered</p>
+                  <p className="text-sm font-semibold text-slate-600 mb-1">Primary Ordered</p>
                   <Statistic
                     value={156}
-                    styles={{ content: { fontSize: '22px', fontWeight: 800, color: '#1F3A60' } }}
+                    styles={{ content: { fontSize: '22px', fontWeight: 800, color: AppColorPalette.brandSecondary } }}
                   />
-                  <p className="text-[10px] text-slate-400 mt-1 font-medium">This Month Trailing</p>
+                  <p className="text-xs text-slate-400 mt-1 font-medium">This Month Trailing</p>
                 </div>
               </Card>
             </Col>
@@ -196,16 +197,16 @@ export default function Dashboard() {
                 variant='borderless'
                 onClick={() => setActiveKpi('revenue')}
                 styles={{ body: { padding: '16px' } }}
-                className={`rounded-md transition-all shadow-sm border-slate-200 ${activeKpi === 'revenue' ? 'border-blue-800 ring-1 ring-blue-800/20' : ''}`}
+                className={`rounded-md transition-all shadow-sm border-slate-200 ${activeKpi === 'revenue' ? 'border-brand-secondary ring-1 ring-brand-secondary/20' : ''}`}
               >
                 <div className="text-center">
-                  <p className="text-xs font-semibold text-slate-600 mb-1">Gross Invoiced Value</p>
+                  <p className="text-sm font-semibold text-slate-600 mb-1">Gross Invoiced Value</p>
                   <Statistic
                     value={2845000}
                     prefix="TK "
-                    styles={{ content: { fontSize: '22px', fontWeight: 800, color: '#1F3A60' } }}
+                    styles={{ content: { fontSize: '22px', fontWeight: 800, color: AppColorPalette.brandSecondary } }}
                   />
-                  <p className="text-[10px] text-slate-400 mt-1 font-medium">Net Realized Collection</p>
+                  <p className="text-xs text-slate-400 mt-1 font-medium">Net Realized Collection</p>
                 </div>
               </Card>
             </Col>
@@ -215,16 +216,16 @@ export default function Dashboard() {
                 variant='borderless'
                 onClick={() => setActiveKpi('credit')}
                 styles={{ body: { padding: '16px' } }}
-                className={`rounded-md transition-all shadow-sm border-slate-200 ${activeKpi === 'credit' ? 'border-blue-800 ring-1 ring-blue-800/20' : ''}`}
+                className={`rounded-md transition-all shadow-sm border-slate-200 ${activeKpi === 'credit' ? 'border-brand-secondary ring-1 ring-brand-secondary/20' : ''}`}
               >
                 <div className="text-center">
-                  <p className="text-xs font-semibold text-slate-600 mb-1">Available Credit Line</p>
+                  <p className="text-sm font-semibold text-slate-600 mb-1">Available Credit Line</p>
                   <Statistic
                     value={6500000}
                     prefix="TK "
-                    styles={{ content: { fontSize: '22px', fontWeight: 800, color: '#1F3A60' } }}
+                    styles={{ content: { fontSize: '22px', fontWeight: 800, color: AppColorPalette.brandSecondary } }}
                   />
-                  <p className="text-[10px] text-slate-400 mt-1 font-medium">Cap Limit: TK 10M</p>
+                  <p className="text-xs text-slate-400 mt-1 font-medium">Cap Limit: TK 10M</p>
                 </div>
               </Card>
             </Col>
@@ -234,16 +235,16 @@ export default function Dashboard() {
                 variant='borderless'
                 onClick={() => setActiveKpi('transit')}
                 styles={{ body: { padding: '16px' } }}
-                className={`rounded-md transition-all shadow-sm border-slate-200 ${activeKpi === 'transit' ? 'border-blue-800 ring-1 ring-blue-800/20' : ''}`}
+                className={`rounded-md transition-all shadow-sm border-slate-200 ${activeKpi === 'transit' ? 'border-brand-secondary ring-1 ring-brand-secondary/20' : ''}`}
               >
                 <div className="text-center">
-                  <p className="text-xs font-semibold text-slate-600 mb-1">Primary Delivered</p>
+                  <p className="text-sm font-semibold text-slate-600 mb-1">Primary Delivered</p>
                   <Statistic
                     value={12}
                     suffix=" Units"
-                    styles={{ content: { fontSize: '22px', fontWeight: 800, color: '#1F3A60' } }}
+                    styles={{ content: { fontSize: '22px', fontWeight: 800, color: AppColorPalette.brandSecondary } }}
                   />
-                  <p className="text-[10px] text-slate-400 mt-1 font-medium">Active Transit Cargo</p>
+                  <p className="text-xs text-slate-400 mt-1 font-medium">Active Transit Cargo</p>
                 </div>
               </Card>
             </Col>
@@ -255,8 +256,8 @@ export default function Dashboard() {
               <div className="bg-white rounded-md border border-slate-200 p-4 sm:p-5 shadow-sm h-full">
                 <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-3">
                   <div>
-                    <h2 className="text-sm font-bold text-[#1F3A60]">Overall Sales Flow Trends</h2>
-                    <p className="text-[11px] text-slate-400">Weekly breakdown of distributor logistics velocity</p>
+                    <h2 className="text-sm font-bold text-brand-secondary">Overall Sales Flow Trends</h2>
+                    <p className="text-xs text-slate-400">Weekly breakdown of distributor logistics velocity</p>
                   </div>
                   <AntTooltip title="Data aggregates ex-mill transaction volumes.">
                     <Info className="w-4 h-4 text-slate-400 cursor-help shrink-0" />
@@ -278,8 +279,8 @@ export default function Dashboard() {
                           }}
                         />
                         <Legend verticalAlign="top" height={32} iconType="square" iconSize={10} wrapperStyle={{ fontSize: '11px' }} />
-                        <Bar name="Dispatched Cargo Units" dataKey="dispatches" fill="#1F3A60" radius={[2, 2, 0, 0]} barSize={20} />
-                        <Bar name="Value Stream (BDT)" dataKey="value" fill="#64748B" radius={[2, 2, 0, 0]} barSize={20} />
+                        <Bar name="Dispatched Cargo Units" dataKey="dispatches" fill={AppColorPalette.brandSecondary} radius={[2, 2, 0, 0]} barSize={20} />
+                        <Bar name="Value Stream (BDT)" dataKey="value" fill={AppColorPalette.brandPrimary} radius={[2, 2, 0, 0]} barSize={20} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -290,8 +291,8 @@ export default function Dashboard() {
             <Col xs={24} lg={8}>
               <div className="bg-white rounded-md border border-slate-200 p-4 sm:p-5 shadow-sm h-full flex flex-col justify-between">
                 <div className="border-b border-slate-100 pb-3">
-                  <h2 className="text-sm font-bold text-[#1F3A60]">Dealer Credit Position</h2>
-                  <p className="text-[11px] text-slate-400">Asset distribution of limits</p>
+                  <h2 className="text-sm font-bold text-brand-secondary">Dealer Credit Position</h2>
+                  <p className="text-xs text-slate-400">Asset distribution of limits</p>
                 </div>
 
                 <div className="relative flex justify-center items-center my-3">
@@ -314,14 +315,14 @@ export default function Dashboard() {
                     </PieChart>
                   </ResponsiveContainer>
                   <div className="absolute text-center pointer-events-none">
-                    <span className="text-xl font-bold text-[#1F3A60]">65%</span>
-                    <p className="text-[9px] uppercase font-bold text-slate-400">Available</p>
+                    <span className="text-xl font-bold text-brand-secondary">65%</span>
+                    <p className="text-xs uppercase font-bold text-slate-400">Available</p>
                   </div>
                 </div>
 
                 <div className="space-y-1.5 text-xs pt-2">
                   {creditDistribution.map((item) => (
-                    <div key={item.name} className="flex items-center justify-between text-[11px]">
+                    <div key={item.name} className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-1.5">
                         <div className="w-2 h-2 rounded-sm" style={{ backgroundColor: item.fill }} />
                         <span className="text-slate-600 truncate max-w-45">{item.name}</span>
@@ -338,12 +339,12 @@ export default function Dashboard() {
           <div className="bg-white rounded-md border border-slate-200 p-4 sm:p-5 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 border-b border-slate-100 pb-3">
               <div>
-                <h2 className="text-sm font-bold text-[#1F3A60]">All Dispatches Ledger</h2>
-                <p className="text-[11px] text-slate-400">Real-time tracked distribution orders routed across dealer lines</p>
+                <h2 className="text-sm font-bold text-brand-secondary">All Dispatches Ledger</h2>
+                <p className="text-xs text-slate-400">Real-time tracked distribution orders routed across dealer lines</p>
               </div>
               <button
                 onClick={() => window.location.href = '/orders'}
-                className="bg-[#1F3A60] hover:bg-[#152842] text-white text-xs font-semibold px-3 py-1.5 rounded-sm transition-colors shadow-xs self-start sm:self-auto"
+                className="bg-brand-secondary hover:bg-brand-secondary/90 text-white text-xs font-semibold px-3 py-1.5 rounded-sm transition-colors shadow-xs self-start sm:self-auto"
               >
                 Load Data
               </button>

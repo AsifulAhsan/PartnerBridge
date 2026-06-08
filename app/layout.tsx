@@ -1,6 +1,7 @@
 import { Analytics } from '@vercel/analytics/next'
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
+import { AppThemeProvider } from '@/lib/theme'
 import './globals.css'
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
@@ -10,10 +11,11 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Sale Sense SFA - PartnerBridge',
-  description: 'Enterprise-grade ordering and management portal for livestock feed and agricultural products',
+  title: 'SaleSense SFA | PartnerBridge — Dealer Portal',
+  description: 'SaleSense SFA PartnerBridge — Enterprise-grade dealer portal for order management, deliveries, invoices, and payments.',
   icons: {
     icon: [
+      { url: '/favicon.ico' },
       {
         url: '/icon-light-32x32.png',
         media: '(prefers-color-scheme: light)',
@@ -29,11 +31,12 @@ export const metadata: Metadata = {
     ],
     apple: '/apple-icon.png',
   },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    userScalable: false,
-  },
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  userScalable: false,
 }
 
 export default function RootLayout({
@@ -50,7 +53,9 @@ export default function RootLayout({
         />
       </head>
       <body className="font-sans antialiased bg-background text-foreground">
-        {children}
+        <AppThemeProvider>
+          {children}
+        </AppThemeProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
