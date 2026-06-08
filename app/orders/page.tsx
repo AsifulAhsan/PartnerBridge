@@ -2,6 +2,7 @@
 
 import { Sidebar } from '@/components/sidebar'
 import { Header } from '@/components/header'
+
 import {
   Search,
   Download,
@@ -28,6 +29,7 @@ import {
   Spin,
   message,
   Descriptions,
+  ConfigProvider
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import axios from 'axios'
@@ -371,23 +373,35 @@ export default function OrdersPage() {
 
           <div className="hidden md:block bg-white rounded-md border border-slate-200 shadow-xs overflow-hidden">
             <Spin spinning={loading}>
-              <Table
-                columns={columns}
-                dataSource={sortedOrders}
-                rowKey="id"
-                size="middle"
-                pagination={{
-                  pageSize: 5,
-                  showSizeChanger: false,
-                  placement: ['bottomRight'] as any,
-                  className:
-                    'px-4 py-3 m-0 border-t border-slate-100 text-xs font-medium',
+              <ConfigProvider
+                theme={{
+                  components: {
+                    Table: {
+                      fontSize: 12,          // Sets internal body content font tracking rules
+                      fontSizeSM: 11,        // Overrides size="small" table fonts explicitly
+                      paddingXS: 8,          // Condenses cellular padding height grids
+                      headerBg: '#0191da',
+                    },
+                  },
                 }}
-                locale={{
-                  emptyText:
-                    'No localized logistics accounts mapped to this query.',
-                }}
-              />
+              >
+                <Table
+                  columns={columns}
+                  dataSource={sortedOrders}
+                  rowKey="id"
+                  size="middle"
+                  pagination={{
+                    pageSize: 5,
+                    showSizeChanger: false,
+                    placement: ['bottomRight'] as any,
+                    className:
+                      'px-4 py-3 m-0 border-t border-slate-100 text-xs font-medium',
+                  }}
+                  locale={{
+                    emptyText:
+                      'No localized logistics accounts mapped to this query.',
+                  }}
+                /></ConfigProvider>
             </Spin>
           </div>
 

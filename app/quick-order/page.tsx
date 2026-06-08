@@ -191,7 +191,7 @@ export default function QuickOrderPage() {
         title: 'Order Dispatched Successfully!',
         okButtonProps: {
           style: {
-            backgroundColor: '#23496b',
+            backgroundColor: '#0191da',
             borderRadius: '2px',
             border: 'none',
           },
@@ -204,7 +204,7 @@ export default function QuickOrderPage() {
             </p>
             <p className="pt-4">
               Generated System ID:{" "}
-              <span className="font-mono font-bold text-brand-secondary">
+              <span className="font-mono font-bold text-[#0191da]">
                 PO-{orderId}
               </span>
             </p>
@@ -384,7 +384,7 @@ export default function QuickOrderPage() {
                       type="default"
                       icon={<PlusOutlined />}
                       onClick={() => addToCart(product)}
-                      className="w-full bg-brand-secondary! hover:bg-[#152842]! text-white! h-9 text-xs font-bold rounded-sm border-none shadow-xs"
+                      className="w-full bg-[#0191da]! hover:bg-[#23496b]! text-white! py-4! h-9 text-xs font-bold rounded-sm border-none shadow-xs"
                     >
                       Add to Order Draft
                     </Button>
@@ -444,7 +444,7 @@ export default function QuickOrderPage() {
                           </span>
                           <p className="text-xs sm:text-sm font-black text-[#23496b] m-0">
                             TK {product.price.toLocaleString('en-IN')}{' '}
-                            <span className="text-[10px] font-bold text-slate-400 font-normal normal-case">
+                            <span className="text-[10px] font-bold text-slate-400 normal-case">
                               /{product.unit}
                             </span>
                           </p>
@@ -481,11 +481,11 @@ export default function QuickOrderPage() {
 
           <div className="bg-white rounded-md border border-slate-200 p-4 sm:p-5 space-y-4 shadow-xs w-full">
             <div className="flex justify-between items-center pb-2.5 border-b border-slate-100">
-              <h2 className="text-sm font-bold text-[#23496b]">
+              <h2 className="text-sm font-bold text-[#0191da]">
                 All Invoices / Draft
               </h2>
               <Tag
-                color="blue"
+                color="#0191da"
                 className="font-bold m-0 rounded-sm border-none text-[10px] uppercase"
               >
                 Active Order
@@ -584,7 +584,7 @@ export default function QuickOrderPage() {
                     type="primary"
                     size="middle"
                     onClick={() => setIsModalOpen(true)}
-                    className="w-full bg-brand-secondary! hover:bg-[#152842]! text-white h-10 font-bold rounded-sm border-none flex items-center justify-center gap-2 py-5! text-xs tracking-wide shadow-xs"
+                    className="w-full bg-[#0191da]! hover:bg-[#23496b]! text-white h-10 font-bold rounded-sm border-none flex items-center justify-center gap-2 py-5! text-xs tracking-wide shadow-xs"
                   >
                     Submit Order
                   </Button>
@@ -632,8 +632,9 @@ export default function QuickOrderPage() {
         cancelText="Cancel"
         okButtonProps={{
           style: {
-            backgroundColor: '#23496b',
+            backgroundColor: '#0191da',
             borderRadius: '2px',
+            padding: '8px',
             border: 'none',
           },
           className: 'text-xs font-bold',

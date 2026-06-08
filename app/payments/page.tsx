@@ -93,7 +93,7 @@ export default function PaymentsPage() {
             title="Payment Management"
             subtitle="Track and submit your payments"
             actions={
-              <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold">
+              <button className="flex items-center gap-2 px-4 py-2 bg-[#0191da] text-white rounded-lg hover:bg-[#1466b8] transition-colors font-semibold">
                 <Plus className="w-4 h-4" />
                 Submit Payment
               </button>
@@ -175,24 +175,24 @@ export default function PaymentsPage() {
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="border-b border-gray-200 bg-background">
+                <thead className="border-b border-gray-200 bg-[#0191da]">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700">
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-white">
                       Payment ID
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700">
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-white">
                       Invoice
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700">
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-white">
                       Payment Method
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700">
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-white">
                       Date
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700">
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-white">
                       Status
                     </th>
-                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700">
+                    <th className="px-6 py-4 text-right text-xs font-semibold text-white">
                       Amount
                     </th>
                   </tr>
@@ -207,7 +207,7 @@ export default function PaymentsPage() {
                           <span className="font-semibold text-gray-900">{payment.id}</span>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="text-gray-700">{payment.invoice}</span>
+                          <span className="text-black">{payment.invoice}</span>
                         </td>
                         <td className="px-6 py-4">
                           <span className="text-gray-600 text-sm">{payment.method}</span>

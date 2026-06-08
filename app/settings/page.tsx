@@ -63,7 +63,7 @@ export default function SettingsPage() {
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex items-center gap-2 px-4 py-3 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
                       activeTab === tab.id
-                        ? 'border-green-600 text-green-600'
+                        ? 'border-[#1466b8] text-[#1466b8]'
                         : 'border-transparent text-gray-600 hover:text-gray-900'
                     }`}
                   >
@@ -148,7 +148,7 @@ export default function SettingsPage() {
                       />
                     </div>
 
-                    <button className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors">
+                    <button className="flex items-center gap-2 px-6 py-2 bg-[#1466b8] text-white rounded-lg font-semibold hover:bg-green-700 transition-colors">
                       <Save className="w-4 h-4" />
                       Save Changes
                     </button>
@@ -208,7 +208,7 @@ export default function SettingsPage() {
                           <span
                             className={`absolute cursor-pointer top-1 left-1 w-5 h-5 rounded-full transition-all ${
                               notificationSettings[item.key as keyof typeof notificationSettings]
-                                ? 'bg-green-600 left-6'
+                                ? 'bg-[#1466b8] left-6'
                                 : 'bg-white'
                             }`}
                           />
@@ -217,7 +217,7 @@ export default function SettingsPage() {
                     ))}
                   </div>
 
-                  <button className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors mt-6">
+                  <button className="flex items-center gap-2 px-6 py-2 bg-[#1466b8] text-white rounded-lg font-semibold hover:bg-green-700 transition-colors mt-6">
                     <Save className="w-4 h-4" />
                     Save Preferences
                   </button>
@@ -255,7 +255,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  <button className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors mt-6">
+                  <button className="flex items-center gap-2 px-6 py-2 bg-[#1466b8] text-white rounded-lg font-semibold hover:bg-green-700 transition-colors mt-6">
                     <CreditCard className="w-4 h-4" />
                     Add Payment Method
                   </button>

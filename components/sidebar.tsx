@@ -52,10 +52,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                 </div>
                 <div className="flex flex-col leading-none">
                   <span className="text-base font-black tracking-wider text-slate-800">
-                    SaleSense
-                  </span>
-                  <span className="text-xs font-bold text-brand tracking-wider uppercase">
-                    SFA PartnerBridge
+                    SaleSense SFA
                   </span>
                 </div>
               </div>

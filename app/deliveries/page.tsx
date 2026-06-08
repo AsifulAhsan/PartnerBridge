@@ -26,6 +26,7 @@ import {
   Tag,
   Divider,
   Descriptions,
+  ConfigProvider
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import axios from 'axios'
@@ -322,8 +323,8 @@ export default function DeliveriesPage() {
               <button
                 onClick={() => setSelectedStatus(null)}
                 className={`px-3 py-1 rounded-sm text-[11px] font-bold transition-all uppercase tracking-wide shrink-0 ${!selectedStatus
-                    ? 'bg-brand-secondary text-white border border-[#23496b]'
-                    : 'bg-slate-100 text-slate-600 border border-slate-200/60 hover:bg-slate-200'
+                  ? 'bg-brand-secondary text-white border border-[#23496b]'
+                  : 'bg-slate-100 text-slate-600 border border-slate-200/60 hover:bg-slate-200'
                   }`}
               >
                 All Shipments
@@ -333,8 +334,8 @@ export default function DeliveriesPage() {
                   key={status}
                   onClick={() => setSelectedStatus(status)}
                   className={`px-3 py-1 rounded-sm text-[11px] font-bold uppercase transition-all tracking-wide shrink-0 ${selectedStatus === status
-                      ? 'bg-brand-secondary text-white border border-[#23496b]'
-                      : 'bg-slate-100 text-slate-600 border border-slate-200/60 hover:bg-slate-200'
+                    ? 'bg-brand-secondary text-white border border-[#23496b]'
+                    : 'bg-slate-100 text-slate-600 border border-slate-200/60 hover:bg-slate-200'
                     }`}
                 >
                   {statusConfig[status as keyof typeof statusConfig].label}
@@ -345,20 +346,32 @@ export default function DeliveriesPage() {
 
           <div className="hidden md:block bg-white rounded-md border border-slate-200 shadow-xs overflow-hidden">
             <Spin spinning={loading}>
-              <Table
-                columns={columns}
-                dataSource={filteredDeliveries}
-                rowKey="id"
-                size="middle"
-                pagination={{
-                  pageSize: 5,
-                  showSizeChanger: false,
-                  placement: ['bottomRight'] as any,
-                  className:
-                    'px-4 py-3 m-0 border-t border-slate-100 text-xs font-medium',
+              <ConfigProvider
+                theme={{
+                  components: {
+                    Table: {
+                      fontSize: 12,          // Sets internal body content font tracking rules
+                      fontSizeSM: 11,        // Overrides size="small" table fonts explicitly
+                      paddingXS: 8,          // Condenses cellular padding height grids
+                      headerBg: '#0191da',
+                    },
+                  },
                 }}
-                locale={{ emptyText: 'No deliveries found.' }}
-              />
+              ><Table
+                  columns={columns}
+                  dataSource={filteredDeliveries}
+                  rowKey="id"
+                  size="middle"
+                  pagination={{
+                    pageSize: 5,
+                    showSizeChanger: false,
+                    placement: ['bottomRight'] as any,
+                    className:
+                      'px-4 py-3 m-0 border-t border-slate-100 text-xs font-medium',
+                  }}
+                  locale={{ emptyText: 'No deliveries found.' }}
+                /></ConfigProvider>
+
             </Spin>
           </div>
 
@@ -442,8 +455,8 @@ export default function DeliveriesPage() {
               <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-slate-100 border border-slate-200 text-slate-700 font-bold text-[10px] uppercase">
                 <span
                   className={`w-1.5 h-1.5 rounded-full ${statusConfig[
-                      selectedDelivery.status as keyof typeof statusConfig
-                    ]?.dotColor
+                    selectedDelivery.status as keyof typeof statusConfig
+                  ]?.dotColor
                     }`}
                 />
                 {

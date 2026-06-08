@@ -16,7 +16,7 @@ export function Header({ title, subtitle, actions, onMenuToggle }: HeaderProps) 
   const [showProfile, setShowProfile] = useState(false)
 
   return (
-    <header className="bg-brand-secondary text-white border-b border-blue-900/40 sticky top-0 z-20 shadow-sm">
+    <header className="bg-[#23496b] text-white sticky top-0 z-20 shadow-sm">
       <div className="px-4 sm:px-6 py-3.5">
         <div className="flex items-center justify-between gap-4">
 
@@ -30,14 +30,14 @@ export function Header({ title, subtitle, actions, onMenuToggle }: HeaderProps) 
             </button>
 
             <div className="hidden lg:flex items-center gap-2.5 shrink-0">
-              <div className="w-7 h-7 bg-white rounded-md flex items-center justify-center shadow-sm overflow-hidden shrink-0">
+              {/* <div className="w-7 h-7 bg-white rounded-md flex items-center justify-center shadow-sm overflow-hidden shrink-0">
                 <Image src="/logo.png" alt="SaleSense" width={24} height={24} className="object-contain" />
-              </div>
+              </div> */}
               <div className="flex items-center gap-2">
-                <span className="font-bruno-ace text-base font-black tracking-wider text-white">
+                <span className="font-bruno-ace lg:hidden text-base font-black tracking-wider text-white">
                   SaleSense SFA
                 </span>
-                <span className="text-sm font-bold text-white tracking-wider uppercase border-l border-blue-400/30 pl-2">
+                <span className="text-md font-bold text-white tracking-wider pl-2">
                   Partner Bridge
                 </span>
               </div>

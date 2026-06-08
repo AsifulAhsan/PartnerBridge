@@ -15,6 +15,9 @@ notification.config({ maxCount: 1 })
 
 export const AppColorPalette = {
   // Brand
+  standardBlue: "#1466b8",
+  secondaryBlue: "0191da",
+  justBlack: "#000000",
   brandPrimary: '#3A73A6', // Darker, yet still muted professional blue
   brandSecondary: '#23496B', // Strong, dark variant for excellent contrast
 
